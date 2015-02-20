@@ -11,6 +11,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.reflections.Reflections;
 
 import javax.ws.rs.Path;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,19 +28,31 @@ public class WebServer {
     private void initialize(Optional<Integer> predefinedPort) {
         this.jettyServer = new Server(predefinedPort.orElse(80));
 
+        List<Handler> requestHandlers = new ArrayList<>();
+
+        if(new File("src/main/resources/web").exists()){
+            // For development, we serve from the sources to allow runtime changes of static content
+            ResourceHandler folderWebHandler = new ResourceHandler();
+            folderWebHandler.setDirectoriesListed(true);
+            folderWebHandler.setResourceBase("src/main/resources/web");
+            requestHandlers.add(folderWebHandler);
+        }
+
         // Serve as static content everything under classpath:/web/
-        ResourceHandler webHandler = new ResourceHandler();
-        webHandler.setBaseResource(Resource.newClassPathResource("/web"));
+        ResourceHandler classpathWebHandler = new ResourceHandler();
+        classpathWebHandler.setBaseResource(Resource.newClassPathResource("/web"));
+        requestHandlers.add(classpathWebHandler);
 
         // Use as resource definitions everything inside that package
         Reflections reflections = new Reflections("ar.com.kfgodel.web.resources");
         Set<Class<?>> annotatedResources = reflections.getTypesAnnotatedWith(Path.class);
-        
+
         ResourceConfig config = new ResourceConfig(annotatedResources);
         final JettyHttpContainer jerseyHandler = ContainerFactory.createContainer(JettyHttpContainer.class, config);
-
+        requestHandlers.add(jerseyHandler);
+        
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { webHandler, jerseyHandler });
+        handlers.setHandlers(requestHandlers.toArray(new Handler[requestHandlers.size()]));
         jettyServer.setHandler(handlers);
     }
 
