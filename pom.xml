@@ -40,6 +40,7 @@
     <version.javaspec>2.0</version.javaspec>
     <version.jetty>9.2.7.v20150116</version.jetty>
     <version.jersey>2.16</version.jersey>
+    <version.reflections>0.9.9</version.reflections>
 
     <!-- Location of the JaCoCo output file created by the agent execution during ITs. We want
 all modules to dump their coverage information into a single file for Sonar to pick up.
@@ -222,7 +223,12 @@ of a fixed location is recommended. -->
         <artifactId>jersey-media-json-jackson</artifactId>
         <version>${version.jersey}</version>
     </dependency>
-
+    <!-- Discover resource classes dinamically -->
+    <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>${version.reflections}</version>
+    </dependency>
     <!-- Logging -->
     <dependency>
         <groupId>org.slf4j</groupId>

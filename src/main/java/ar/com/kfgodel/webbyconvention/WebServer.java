@@ -8,8 +8,11 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.glassfish.jersey.jetty.JettyHttpContainer;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.reflections.Reflections;
 
+import javax.ws.rs.Path;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * This type represents the simplified by pre-definitions jetty server 
@@ -27,8 +30,10 @@ public class WebServer {
         webHandler.setBaseResource(Resource.newClassPathResource("/web"));
 
         // Use as resource definitions everything inside that package
-        ResourceConfig config = new ResourceConfig()
-                .packages(true, "ar.com.kfgodel.web.resources");
+        Reflections reflections = new Reflections("ar.com.kfgodel.web.resources");
+        Set<Class<?>> annotatedResources = reflections.getTypesAnnotatedWith(Path.class);
+        
+        ResourceConfig config = new ResourceConfig(annotatedResources);
         final JettyHttpContainer jerseyHandler = ContainerFactory.createContainer(JettyHttpContainer.class, config);
 
         HandlerList handlers = new HandlerList();
