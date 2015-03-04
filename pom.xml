@@ -5,7 +5,7 @@
 
 <groupId>ar.com.kfgodel</groupId>
 <artifactId>web-by-convention</artifactId>
-<version>0.1-SNAPSHOT</version>
+<version>0.2-SNAPSHOT</version>
 <name>WebByConvention</name>
 <description>Pre-configured Jetty server to write web apps really easily (using convention over configuration)</description>
 
