@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -61,6 +62,17 @@ public class WebServer {
         }
 
         ResourceConfig config = new ResourceConfig(annotatedResources);
+        // Activate tracing log on requests
+//        headers: {
+//            "X-Jersey-Tracing-Accept": 'true', // Any value is ok
+//                    "X-Jersey-Tracing-Threshold": 'TRACE'
+//        }
+
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("jersey.config.server.tracing.type", "ON_DEMAND");
+        properties.put("jersey.config.server.tracing.threshold", "SUMMARY");
+        config.addProperties(properties);
+
         final JettyHttpContainer jerseyHandler = ContainerFactory.createContainer(JettyHttpContainer.class, config);
         requestHandlers.add(jerseyHandler);
     }
