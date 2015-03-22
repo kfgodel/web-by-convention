@@ -122,4 +122,11 @@ public class WebServer {
         return webServer;
     }
 
+    public void stop() throws WebServerException{
+        try {
+            jettyServer.stop();
+        } catch (Exception e) {
+            throw new WebServerException("Error stopping web server", e);
+        }
+    }
 }
