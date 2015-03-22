@@ -61,7 +61,9 @@ public class WebServer {
             return;
         }
 
-        ResourceConfig config = new ResourceConfig(annotatedResources);
+        ResourceConfig jerseyConfig = new ResourceConfig(annotatedResources);
+        //Configure dependency injection for resources
+        jerseyConfig.register(ConfigurableInjectionBinder.create(this.config.getInjectionConfiguration()));
         // Activate tracing log on requests
 //        headers: {
 //            "X-Jersey-Tracing-Accept": 'true', // Any value is ok
@@ -71,9 +73,9 @@ public class WebServer {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("jersey.config.server.tracing.type", "ON_DEMAND");
         properties.put("jersey.config.server.tracing.threshold", "SUMMARY");
-        config.addProperties(properties);
+        jerseyConfig.addProperties(properties);
 
-        final JettyHttpContainer jerseyHandler = ContainerFactory.createContainer(JettyHttpContainer.class, config);
+        final JettyHttpContainer jerseyHandler = ContainerFactory.createContainer(JettyHttpContainer.class, jerseyConfig);
         requestHandlers.add(jerseyHandler);
     }
 
@@ -104,9 +106,13 @@ public class WebServer {
         }
     }
 
-    public void startAndJoin() throws Exception {
-        jettyServer.start();
-        jettyServer.join();
+    public void startAndJoin() throws WebServerException {
+        try {
+            jettyServer.start();
+            jettyServer.join();
+        } catch (Exception e) {
+            throw new WebServerException("Error starting web server", e);
+        }
     }
 
     public static WebServer createFor(WebServerConfiguration config) {

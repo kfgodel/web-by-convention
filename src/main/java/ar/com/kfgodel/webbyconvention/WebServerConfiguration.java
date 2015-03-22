@@ -1,6 +1,9 @@
 package ar.com.kfgodel.webbyconvention;
 
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
+
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * This type represents the configuration used by a web-by-convention server to setup 
@@ -29,4 +32,9 @@ public interface WebServerConfiguration {
      * @return The package in the classpath that holds jersey annotated resources to expose as api
      */
     String getApiResourcesPackage();
+
+    /**
+     * @return The code to setup injection bindings for the jersey resources
+     */
+    Consumer<AbstractBinder> getInjectionConfiguration();
 }

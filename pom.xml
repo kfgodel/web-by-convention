@@ -39,7 +39,7 @@
     <version.mockito>1.9.5</version.mockito>
     <version.javaspec>2.0</version.javaspec>
     <version.jetty>9.2.7.v20150116</version.jetty>
-    <version.jersey>2.16</version.jersey>
+    <version.jersey>2.17</version.jersey>
     <version.reflections>0.9.9</version.reflections>
 
     <!-- Location of the JaCoCo output file created by the agent execution during ITs. We want
