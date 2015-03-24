@@ -38,6 +38,7 @@
     <version.assertj>1.6.1</version.assertj>
     <version.mockito>1.9.5</version.mockito>
     <version.javaspec>2.0</version.javaspec>
+
     <version.jetty>9.2.7.v20150116</version.jetty>
     <version.jersey>2.17</version.jersey>
     <version.reflections>0.9.9</version.reflections>
@@ -216,6 +217,27 @@ of a fixed location is recommended. -->
         <groupId>org.glassfish.jersey.containers</groupId>
         <artifactId>jersey-container-jetty-http</artifactId>
         <version>${version.jersey}</version>
+        <exclusions>
+            <!-- Avoid version problem with jetty -->
+            <exclusion>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-continuation</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-util</artifactId>
+        <version>${version.jetty}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-continuation</artifactId>
+        <version>${version.jetty}</version>
     </dependency>
     <!-- Json support for rest -->
     <dependency>
