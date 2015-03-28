@@ -25,7 +25,9 @@ import java.util.Enumeration;
 import java.util.Locale;
 
 /**
- * Copied from jetty FormAuthenticator to fix a NPE bug while accessing a null contextPath
+ * Copied from jetty FormAuthenticator to fix a NPE bug while accessing a null contextPath.<br>
+ *     Modified a little to respond 403 and 200 instead of redirect.
+ *     Added logout
  * Created by kfgodel on 28/03/15.
  */
 public class FormAuthenticator extends LoginAuthenticator
@@ -41,6 +43,8 @@ public class FormAuthenticator extends LoginAuthenticator
     public final static String __J_SECURITY_CHECK = "/j_security_check";
     public final static String __J_USERNAME = "j_username";
     public final static String __J_PASSWORD = "j_password";
+
+    public final static String __J_LOGOUT = "/j_logout";
 
     private String _formErrorPage;
     private String _formErrorPath;
@@ -211,12 +215,23 @@ public class FormAuthenticator extends LoginAuthenticator
         if (uri==null)
             uri= URIUtil.SLASH;
 
+        if(isJLogout(uri)){
+            HttpSession currentSession = request.getSession(false);
+            if(currentSession != null){
+                currentSession.invalidate();
+            }
+
+            response.setContentLength(0);
+            return Authentication.SEND_SUCCESS;
+        }
+
         mandatory|=isJSecurityCheck(uri);
         if (!mandatory)
             return new DeferredAuthentication(this);
 
         if (isLoginOrErrorPage(URIUtil.addPaths(request.getServletPath(),request.getPathInfo())) &&!DeferredAuthentication.isDeferred(response))
             return new DeferredAuthentication(this);
+
 
         HttpSession session = request.getSession(true);
 
@@ -390,11 +405,19 @@ public class FormAuthenticator extends LoginAuthenticator
     /* ------------------------------------------------------------ */
     public boolean isJSecurityCheck(String uri)
     {
-        int jsc = uri.indexOf(__J_SECURITY_CHECK);
+        return hasUriSegment(uri, __J_SECURITY_CHECK);
+    }
+    public boolean isJLogout(String uri)
+    {
+        return hasUriSegment(uri, __J_LOGOUT);
+    }
+
+    private boolean hasUriSegment(String uri, String urlSegment) {
+        int jsc = uri.indexOf(urlSegment);
 
         if (jsc<0)
             return false;
-        int e=jsc+__J_SECURITY_CHECK.length();
+        int e=jsc+ urlSegment.length();
         if (e==uri.length())
             return true;
         char c = uri.charAt(e);
