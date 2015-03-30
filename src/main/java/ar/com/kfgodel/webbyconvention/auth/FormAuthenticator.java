@@ -26,7 +26,7 @@ import java.util.Locale;
 
 /**
  * Copied from jetty FormAuthenticator to fix a NPE bug while accessing a null contextPath.<br>
- *     Modified a little to respond 403 and 200 instead of redirect.
+ *     Modified a little to respond 401 and 200 instead of redirect.
  *     Added logout
  * Created by kfgodel on 28/03/15.
  */
@@ -222,6 +222,7 @@ public class FormAuthenticator extends LoginAuthenticator
             }
 
             response.setContentLength(0);
+            response.setContentType("text/plain");
             return Authentication.SEND_SUCCESS;
         }
 
@@ -275,6 +276,7 @@ public class FormAuthenticator extends LoginAuthenticator
 
                     // Do a 200 OK instead of 303 redirect to main page
                     response.getWriter().write(applicationIdentification.toString());
+                    response.setContentType("text/plain");
                     return form_auth;
                 }
 
@@ -283,9 +285,9 @@ public class FormAuthenticator extends LoginAuthenticator
                     LOG.debug("Form authentication FAILED for " + StringUtil.printable(username));
                 if (_formErrorPage == null)
                 {
-                    LOG.debug("auth failed {}->403",username);
+                    LOG.debug("auth failed {}->401",username);
                     if (response != null)
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
                 else if (_dispatch)
                 {
@@ -394,8 +396,8 @@ public class FormAuthenticator extends LoginAuthenticator
             else
             {
                 LOG.debug("challenge {}->{}", session.getId(), _formLoginPage);
-                //Do a 403 instead of a 303 redirect to login page
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                //Do a 401 instead of a 303 redirect to login page
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return Authentication.SEND_FAILURE;
             }
             return Authentication.SEND_CONTINUE;
