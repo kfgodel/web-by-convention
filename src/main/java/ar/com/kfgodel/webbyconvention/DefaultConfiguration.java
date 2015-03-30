@@ -1,10 +1,13 @@
 package ar.com.kfgodel.webbyconvention;
 
+import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
 import com.google.common.collect.Lists;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This type represents the defaul configuration with sensitive values for all the parameters.
@@ -23,6 +26,13 @@ public class DefaultConfiguration implements WebServerConfiguration {
     private String apiResourcesPackage = "web.api.resources";
 
     private Consumer<AbstractBinder> injectionConfiguration = this::noBinding;
+
+    private Function<WebCredential, Optional<Object>> authenticatorFunction = this::authenticateAll;
+
+    private Optional<Object> authenticateAll(WebCredential webCredential) {
+        // We allow access to every login attempt
+        return Optional.of(true);
+    }
 
     private void noBinding(AbstractBinder abstractBinder) {
         // By default there are no bindings
@@ -51,6 +61,11 @@ public class DefaultConfiguration implements WebServerConfiguration {
     @Override
     public Consumer<AbstractBinder> getInjectionConfiguration() {
         return injectionConfiguration;
+    }
+
+    @Override
+    public Function<WebCredential, Optional<Object>> getAuthenticatorFunction() {
+        return authenticatorFunction;
     }
 
     public static DefaultConfiguration create() {
@@ -105,6 +120,18 @@ public class DefaultConfiguration implements WebServerConfiguration {
      */
     public DefaultConfiguration withInjections(Consumer<AbstractBinder> binderConfig){
         this.injectionConfiguration = binderConfig;
+        return this;
+    }
+
+    /**
+     * Changes the default "allow all" authentication to a custom app authenticator function.<br>
+     *     The function will be called for every authentication attempt, and the non empty returned object
+     *     will be used as the user id, available in a thread context through the WebAuthenticatedId class
+     * @param authenticationFunction The authentication function
+     * @return This isntance to allow method chaining
+     */
+    public WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction) {
+        this.authenticatorFunction = authenticationFunction;
         return this;
     }
 }

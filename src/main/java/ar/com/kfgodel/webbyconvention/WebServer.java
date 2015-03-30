@@ -1,7 +1,8 @@
 package ar.com.kfgodel.webbyconvention;
 
 import ar.com.kfgodel.webbyconvention.auth.FormAuthenticator;
-import ar.com.kfgodel.webbyconvention.auth.LoginServiceImpl;
+import ar.com.kfgodel.webbyconvention.auth.WebLoginService;
+import ar.com.kfgodel.webbyconvention.auth.impl.Handlers;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;
@@ -36,62 +37,65 @@ public class WebServer {
     private void initialize() {
         this.jettyServer = new Server(config.getHttpPort());
 
-        List<Handler> requestHandlers = new ArrayList<>();
+        List<Handler> partialList = new ArrayList<>();
 
         // Make web content refreshable if changed
-        serveDynamicContent(requestHandlers);
+        serveDynamicContent(partialList);
 
         // Serve as static content everything under classpath:/web/
-        serveStaticContent(requestHandlers);
+        serveStaticContent(partialList);
 
         // Publish Jersey resources as API
-        serveApi(requestHandlers);
-        
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(requestHandlers.toArray(new Handler[requestHandlers.size()]));
-//        jettyServer.setHandler(handlers);
+        serveApi(partialList);
 
 
-        // Since this example is for our test webapp, we need to setup a LoginService so this shows how to create a
-        // very simple hashmap based one.  The name of the LoginService needs to correspond to what is configured a
-        // webapp's web.xml and since it has a lifecycle of its own we register it as a bean with the Jetty server
-        // object so it can be started and stopped according to the lifecycle of the server itself. In this example
-        // the name can be whatever you like since we are not dealing with webapp realms.
-        LoginService loginService = LoginServiceImpl.create();
-        jettyServer.addBean(loginService);
+        HandlerList unsecuredHandlers = Handlers.asList(partialList);
+        HandlerList securedHandlers = addAccessConstraints(unsecuredHandlers);
+        jettyServer.setHandler(securedHandlers);
 
-        // A security handler is a jetty handler that secures content behind a particular portion of a url space. The
-        // ConstraintSecurityHandler is a more specialized handler that allows matching of urls to different
-        // constraints. The server sets this as the first handler in the chain,
-        // effectively applying these constraints to all subsequent handlers in the chain.
-        ConstraintSecurityHandler security = new ConstraintSecurityHandler();
-        HandlerList securityList = new HandlerList();
-        securityList.setHandlers(new Handler[]{new SessionHandler(), security});
-        jettyServer.setHandler(securityList);
+    }
+
+    /**
+     * Creates constrants to secure the api access frim unauthenticated access
+     * @param unsecuredHandlers The list of handlers to secure
+     * @return The secured handlers
+     */
+    private HandlerList addAccessConstraints(HandlerList unsecuredHandlers) {
 
         // This constraint requires authentication and in addition that an authenticated user be a member of a given
-        // set of roles for authorization purposes.
+        // the "user" role.
         Constraint constraint = new Constraint();
         constraint.setName("auth");
         constraint.setAuthenticate(true);
-        constraint.setRoles(new String[]{"user", "admin"});
+        constraint.setRoles(new String[]{"user"});
 
         // Binds a url pattern with the previously created constraint. The roles for this constraing mapping are
         // mined from the Constraint itself although methods exist to declare and bind roles separately as well.
         ConstraintMapping mapping = new ConstraintMapping();
-        mapping.setPathSpec( "/api/v1/*" );
-        mapping.setConstraint( constraint );
+        mapping.setPathSpec( "/api/*" );
+        mapping.setConstraint(constraint);
 
-        // First you see the constraint mapping being applied to the handler as a singleton list,
-        // however you can passing in as many security constraint mappings as you like so long as they follow the
-        // mapping requirements of the servlet api. Next we set a BasicAuthenticator instance which is the object
-        // that actually checks the credentials followed by the LoginService which is the store of known users, etc.
+        // A security handler is a jetty handler that secures content behind a particular portion of a url space. The
+        // ConstraintSecurityHandler is a more specialized handler that allows matching of urls to different
+        // constraints. The session handler is needed by form authentication to create a session for a given
+        // user
+        ConstraintSecurityHandler security = new ConstraintSecurityHandler();
+        HandlerList securedHandlers = Handlers.asList(new SessionHandler(), security);
+
+        // We add the mapping to restrict the secured urls. Next a form authenticator will look for certain
+        // requests and parameters to authenticate a user and manage its session
         security.setConstraintMappings(Collections.singletonList(mapping));
         security.setAuthenticator(new FormAuthenticator("/#/login",null,false));
-        security.setLoginService(loginService);
 
-        // chain the hello handler into the security handler
-        security.setHandler(handlers);
+        // Finally a login service is used by the chosen authenticator to authenticate a user against the application code
+        // This login service uses the function given by the webServer config
+        LoginService loginService = WebLoginService.create(config.getAuthenticatorFunction());
+        security.setLoginService(loginService);
+        jettyServer.addBean(loginService);
+
+        // Wrap the unsecure handlers into the secure handlers
+        security.setHandler(unsecuredHandlers);
+        return securedHandlers;
     }
 
     /**

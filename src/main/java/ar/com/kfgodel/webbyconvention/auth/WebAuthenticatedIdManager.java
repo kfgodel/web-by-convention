@@ -1,7 +1,7 @@
 package ar.com.kfgodel.webbyconvention.auth;
 
 import ar.com.kfgodel.webbyconvention.WebServerException;
-import org.eclipse.jetty.security.DefaultIdentityService;
+import ar.com.kfgodel.webbyconvention.auth.api.WebAuthenticatedId;
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.RunAsToken;
 import org.eclipse.jetty.server.UserIdentity;
@@ -10,22 +10,32 @@ import javax.security.auth.Subject;
 import java.security.Principal;
 
 /**
+ * This type allows the management of a web identification into the context of the executing thread.<br>
+ *     Using this type the web server can make the current user identity available to the application through the
+ *     current thread
  * Created by kfgodel on 27/03/15.
  */
-public class IdentityServiceImpl implements IdentityService {
+public class WebAuthenticatedIdManager implements IdentityService {
 
-    private IdentityService delegate;
 
     @Override
     public Object associate(UserIdentity user) {
-        // Link user to thread
-        return delegate.associate(user);
+        if(user == null){
+            //Unlik
+            WebAuthenticatedId.removeFromThread();
+        }else{
+            //We don't use other type of identity
+            WebUserIdentification userId = (WebUserIdentification) user;
+            // Make the ide available
+            WebAuthenticatedId.setInThread(userId);
+        }
+        return null;
     }
 
     @Override
     public void disassociate(Object previous) {
         // Unlik user from thread
-        delegate.disassociate(previous);
+        WebAuthenticatedId.removeFromThread();
     }
 
     @Override
@@ -53,9 +63,8 @@ public class IdentityServiceImpl implements IdentityService {
         throw new WebServerException("Not implemented");
     }
 
-    public static IdentityServiceImpl create() {
-        IdentityServiceImpl identityService = new IdentityServiceImpl();
-        identityService.delegate = new DefaultIdentityService();
+    public static WebAuthenticatedIdManager create() {
+        WebAuthenticatedIdManager identityService = new WebAuthenticatedIdManager();
         return identityService;
     }
 

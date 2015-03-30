@@ -1,9 +1,12 @@
 package ar.com.kfgodel.webbyconvention;
 
+import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This type represents the configuration used by a web-by-convention server to setup 
@@ -37,4 +40,17 @@ public interface WebServerConfiguration {
      * @return The code to setup injection bindings for the jersey resources
      */
     Consumer<AbstractBinder> getInjectionConfiguration();
+
+    /**
+     * The function used to authenticate user credentials give to the web server.<br>
+     *     The function receive a credential object for every authentication attempt and returns
+     *     an empty optional for failed authentication, or an object for successful ones.<br>
+     * <br>
+     *     The returned object can be used later to identify the authenticated user, and it's available
+     *     in a thread context from requests that comes from the same session.<br>
+     *     To access the generated object WebAuthenticatedId can be used
+     *
+     * @return An authenticator function
+     */
+    Function<WebCredential,Optional<Object>> getAuthenticatorFunction();
 }
