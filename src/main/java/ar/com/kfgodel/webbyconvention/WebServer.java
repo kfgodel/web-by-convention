@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This type represents the simplified by pre-definitions jetty server 
@@ -80,7 +81,9 @@ public class WebServer {
         // constraints. The session handler is needed by form authentication to create a session for a given
         // user
         ConstraintSecurityHandler security = new ConstraintSecurityHandler();
-        HandlerList securedHandlers = Handlers.asList(new SessionHandler(), security);
+        SessionHandler sessionHandler = new SessionHandler();
+        sessionHandler.getSessionManager().setMaxInactiveInterval((int) TimeUnit.MINUTES.toSeconds(30));
+        HandlerList securedHandlers = Handlers.asList(sessionHandler, security);
 
         // We add the mapping to restrict the secured urls. Next a form authenticator will look for certain
         // requests and parameters to authenticate a user and manage its session
