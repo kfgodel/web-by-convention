@@ -82,7 +82,7 @@ public class WebServer {
         // user
         ConstraintSecurityHandler security = new ConstraintSecurityHandler();
         SessionHandler sessionHandler = new SessionHandler();
-        sessionHandler.getSessionManager().setMaxInactiveInterval((int) TimeUnit.MINUTES.toSeconds(30));
+        sessionHandler.getSessionManager().setMaxInactiveInterval(config.getSessionTimeout());
         HandlerList securedHandlers = Handlers.asList(sessionHandler, security);
 
         // We add the mapping to restrict the secured urls. Next a form authenticator will look for certain

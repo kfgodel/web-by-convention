@@ -6,6 +6,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -28,6 +29,8 @@ public class DefaultConfiguration implements WebServerConfiguration {
     private Consumer<AbstractBinder> injectionConfiguration = this::noBinding;
 
     private Function<WebCredential, Optional<Object>> authenticatorFunction = this::authenticateAll;
+
+    private int sessionTimeout = (int) TimeUnit.MINUTES.toSeconds(30);
 
     private Optional<Object> authenticateAll(WebCredential webCredential) {
         // We allow access to every login attempt
@@ -66,6 +69,11 @@ public class DefaultConfiguration implements WebServerConfiguration {
     @Override
     public Function<WebCredential, Optional<Object>> getAuthenticatorFunction() {
         return authenticatorFunction;
+    }
+
+    @Override
+    public int getSessionTimeout() {
+        return sessionTimeout;
     }
 
     public static DefaultConfiguration create() {
@@ -120,6 +128,17 @@ public class DefaultConfiguration implements WebServerConfiguration {
      */
     public DefaultConfiguration withInjections(Consumer<AbstractBinder> binderConfig){
         this.injectionConfiguration = binderConfig;
+        return this;
+    }
+
+    /**
+     * Sets the max interval in seconds between requests to keep a session alive.
+     * After the session dies, the user will have to login again for access to authenticated resources
+     * @param seconds The amount of seconds to wait for next request
+     * @return This instance for mathod chaining
+     */
+    public DefaultConfiguration expiringSessionsAfter(int seconds){
+        this.sessionTimeout = seconds;
         return this;
     }
 

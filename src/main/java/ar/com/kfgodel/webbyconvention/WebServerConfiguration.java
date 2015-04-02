@@ -53,4 +53,10 @@ public interface WebServerConfiguration {
      * @return An authenticator function
      */
     Function<WebCredential,Optional<Object>> getAuthenticatorFunction();
+
+    /**
+     * @return The amount of seconds a session can remain inactive before invalidating it.<br>
+     *     After that user will have to re-login
+     */
+    int getSessionTimeout();
 }
