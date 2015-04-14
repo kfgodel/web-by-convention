@@ -54,6 +54,8 @@ public class WebServer {
         HandlerList securedHandlers = addAccessConstraints(unsecuredHandlers);
         jettyServer.setHandler(securedHandlers);
 
+        // Prevents file locking in windows
+        jettyServer.setAttribute("useFileMappedBuffer",false);
     }
 
     /**
