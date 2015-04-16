@@ -3,6 +3,7 @@ package ar.com.kfgodel.webbyconvention;
 import ar.com.kfgodel.webbyconvention.auth.FormAuthenticator;
 import ar.com.kfgodel.webbyconvention.auth.WebLoginService;
 import ar.com.kfgodel.webbyconvention.auth.impl.Handlers;
+import ar.com.kfgodel.webbyconvention.bugs.NonLockingResourceHandler;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;
@@ -153,12 +154,30 @@ public class WebServer {
         for (String refreshableSource : refreshableSources) {
             if(new File(refreshableSource).exists()){
                 // For development, we serve from the sources to allow runtime changes of static content
-                ResourceHandler folderWebHandler = new ResourceHandler();
-                folderWebHandler.setDirectoriesListed(true);
-                folderWebHandler.setResourceBase(refreshableSource);
+                Handler folderWebHandler = createDynamicContentHandler(refreshableSource);
                 requestHandlers.add(folderWebHandler);
             }
         }
+    }
+
+    /**
+     * Create the resource handler that we will use to serve static content that could be changed
+     * while we are running. Due to the way Jetty opens files to buffer them, in windows that
+     * generates a locked file, that cannot be changed once served. To prevent that we try to
+     * detect the OS and use a non standard handler that doesn't lock files.
+     * @return
+     * @param refreshableSource
+     */
+    private Handler createDynamicContentHandler(String refreshableSource) {
+        String currentOsName = System.getProperty("os.name");
+        if(currentOsName.startsWith("Windows")){
+            NonLockingResourceHandler nonLockingResourceHandler = new NonLockingResourceHandler();
+            nonLockingResourceHandler.setResourceBase(refreshableSource);
+            return nonLockingResourceHandler;
+        }
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase(refreshableSource);
+        return resourceHandler;
     }
 
     public void startAndJoin() throws WebServerException {
