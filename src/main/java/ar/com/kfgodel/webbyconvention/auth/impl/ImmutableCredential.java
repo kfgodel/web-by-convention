@@ -29,4 +29,13 @@ public class ImmutableCredential implements WebCredential {
         return credential;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("user: ");
+        builder.append(username);
+        builder.append(", pass: ");
+        builder.append(password);
+        return builder.toString();
+    }
 }
