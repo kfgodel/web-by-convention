@@ -4,6 +4,7 @@ import ar.com.kfgodel.webbyconvention.auth.FormAuthenticator;
 import ar.com.kfgodel.webbyconvention.auth.WebLoginService;
 import ar.com.kfgodel.webbyconvention.auth.impl.Handlers;
 import ar.com.kfgodel.webbyconvention.bugs.NonLockingResourceHandler;
+import ar.com.kfgodel.webbyconvention.logging.RequestLoggerHandler;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;
@@ -24,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This type represents the simplified by pre-definitions jetty server 
@@ -41,6 +41,8 @@ public class WebServer {
 
         List<Handler> partialList = new ArrayList<>();
 
+        partialList.add(RequestLoggerHandler.create());
+
         // Make web content refreshable if changed
         serveDynamicContent(partialList);
 
@@ -49,7 +51,6 @@ public class WebServer {
 
         // Publish Jersey resources as API
         serveApi(partialList);
-
 
         HandlerList unsecuredHandlers = Handlers.asList(partialList);
         HandlerList securedHandlers = addAccessConstraints(unsecuredHandlers);
