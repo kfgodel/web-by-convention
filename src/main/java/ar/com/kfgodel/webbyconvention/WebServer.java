@@ -41,7 +41,8 @@ public class WebServer {
 
         List<Handler> partialList = new ArrayList<>();
 
-        partialList.add(RequestLoggerHandler.create());
+        // Publish Jersey resources as API
+        serveApi(partialList);
 
         // Make web content refreshable if changed
         serveDynamicContent(partialList);
@@ -49,12 +50,9 @@ public class WebServer {
         // Serve as static content everything under classpath:/web/
         serveStaticContent(partialList);
 
-        // Publish Jersey resources as API
-        serveApi(partialList);
-
-        HandlerList unsecuredHandlers = Handlers.asList(partialList);
-        HandlerList securedHandlers = addAccessConstraints(unsecuredHandlers);
-        jettyServer.setHandler(securedHandlers);
+        HandlerList securedHandlers = Handlers.asList(partialList);
+        HandlerList allHandlers = addAccessConstraints(securedHandlers);
+        jettyServer.setHandler(allHandlers);
 
         // Prevents file locking in windows
         jettyServer.setAttribute("useFileMappedBuffer",false);
@@ -87,7 +85,8 @@ public class WebServer {
         ConstraintSecurityHandler security = new ConstraintSecurityHandler();
         SessionHandler sessionHandler = new SessionHandler();
         sessionHandler.getSessionManager().setMaxInactiveInterval(config.getSessionTimeout());
-        HandlerList securedHandlers = Handlers.asList(sessionHandler, security);
+        RequestLoggerHandler loggerHandler = RequestLoggerHandler.create();
+        HandlerList securedHandlers = Handlers.asList(loggerHandler, sessionHandler, security);
 
         // We add the mapping to restrict the secured urls. Next a form authenticator will look for certain
         // requests and parameters to authenticate a user and manage its session

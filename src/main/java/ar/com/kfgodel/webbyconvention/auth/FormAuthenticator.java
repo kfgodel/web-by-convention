@@ -202,7 +202,9 @@ public class FormAuthenticator extends LoginAuthenticator
         if (LOG.isDebugEnabled()) LOG.debug("Restoring original method {} for {} with method {}", method, juri,httpRequest.getMethod());
         Request base_request = HttpChannel.getCurrentHttpChannel().getRequest();
         HttpMethod m = HttpMethod.fromString(method);
-        base_request.setMethod(m,m.asString());
+        LOG.info("Ignorando restore de metodo: {} en request {} {}", m, base_request.getMethod(), base_request.getUri());
+        // Esto me cambia el meodo de algunos requests erroneamente. No sé si es un bug o lo estoy usando mal
+//        base_request.setMethod(m,m.asString());
     }
 
     /* ------------------------------------------------------------ */
