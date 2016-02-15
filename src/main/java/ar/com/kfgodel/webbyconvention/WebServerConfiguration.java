@@ -59,4 +59,9 @@ public interface WebServerConfiguration {
      *     After that user will have to re-login
      */
     int getSessionTimeout();
+
+  /**
+   * @return The url segment that serves as root for all the api requests
+   */
+  String getApiRootPath();
 }

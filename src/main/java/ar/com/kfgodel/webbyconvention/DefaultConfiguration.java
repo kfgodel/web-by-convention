@@ -32,6 +32,8 @@ public class DefaultConfiguration implements WebServerConfiguration {
 
     private int sessionTimeout = (int) TimeUnit.MINUTES.toSeconds(30);
 
+    private String apiRootUrl = "/api";
+
     private Optional<Object> authenticateAll(WebCredential webCredential) {
         // We allow access to every login attempt
         return Optional.of(true);
@@ -74,6 +76,11 @@ public class DefaultConfiguration implements WebServerConfiguration {
     @Override
     public int getSessionTimeout() {
         return sessionTimeout;
+    }
+
+    @Override
+    public String getApiRootPath() {
+        return apiRootUrl;
     }
 
     public static DefaultConfiguration create() {
@@ -135,10 +142,20 @@ public class DefaultConfiguration implements WebServerConfiguration {
      * Sets the max interval in seconds between requests to keep a session alive.
      * After the session dies, the user will have to login again for access to authenticated resources
      * @param seconds The amount of seconds to wait for next request
-     * @return This instance for mathod chaining
+     * @return This instance for method chaining
      */
     public DefaultConfiguration expiringSessionsAfter(int seconds){
         this.sessionTimeout = seconds;
+        return this;
+    }
+
+  /**
+   * Sets which part of the route is dedicated to api requests
+   * @param parentPath The parent url
+   * @return This instance for chaining methods
+   */
+    public DefaultConfiguration withApiUnder(String parentPath){
+        this.apiRootUrl = parentPath;
         return this;
     }
 
