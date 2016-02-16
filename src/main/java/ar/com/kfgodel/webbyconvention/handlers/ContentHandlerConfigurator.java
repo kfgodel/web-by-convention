@@ -53,7 +53,19 @@ public class ContentHandlerConfigurator {
     Handler staticHandler = createStaticContentHandler();
     partialList.add(staticHandler);
 
+    // If no other handler can respond, answer the index page. The frontend should take care of wrong urls
+    Handler indexHandler = createAnyToIndexHandler();
+    partialList.add(indexHandler);
+
     return Handlers.asList(partialList);
+  }
+
+  /**
+   * Creates the handler that serves the index page for any url (only for GET or POST)
+   * @return The created handler
+   */
+  private Handler createAnyToIndexHandler() {
+    return ServeIndexHandler.create(config.getWebFolderInClasspath());
   }
 
   /**

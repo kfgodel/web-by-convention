@@ -7,7 +7,9 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.HandlerList;
 
 /**
- * This type knows how to create the http handler that will handle the requests according to the server configuration
+ * This type knows how to create the http handler that will handle the requests according to the server configuration.<br>
+ *   The orchestrator collaborates with the content handler, and a securizer handler to put sensitive content under an
+ *   authentication mechanism
  * Created by kfgodel on 14/02/16.
  */
 public class HandlerOrchestrator {
