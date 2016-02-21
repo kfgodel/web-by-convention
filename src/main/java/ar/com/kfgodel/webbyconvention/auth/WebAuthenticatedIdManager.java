@@ -21,12 +21,12 @@ public class WebAuthenticatedIdManager implements IdentityService {
     @Override
     public Object associate(UserIdentity user) {
         if(user == null){
-            //Unlik
+            //Unlink
             WebAuthenticatedId.removeFromThread();
         }else{
             //We don't use other type of identity
             WebUserIdentification userId = (WebUserIdentification) user;
-            // Make the ide available
+            // Make the id available
             WebAuthenticatedId.setInThread(userId);
         }
         return null;
@@ -34,7 +34,7 @@ public class WebAuthenticatedIdManager implements IdentityService {
 
     @Override
     public void disassociate(Object previous) {
-        // Unlik user from thread
+        // Unlink user from thread
         WebAuthenticatedId.removeFromThread();
     }
 

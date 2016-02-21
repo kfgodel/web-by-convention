@@ -1,9 +1,8 @@
 package ar.com.kfgodel.webbyconvention.handlers;
 
 import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
-import ar.com.kfgodel.webbyconvention.auth.FormAuthenticator;
+import ar.com.kfgodel.webbyconvention.bugs.FormAuthenticator;
 import ar.com.kfgodel.webbyconvention.auth.WebLoginService;
-import ar.com.kfgodel.webbyconvention.auth.impl.Handlers;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;

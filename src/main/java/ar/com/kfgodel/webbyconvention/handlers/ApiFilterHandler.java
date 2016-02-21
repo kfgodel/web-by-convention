@@ -24,7 +24,7 @@ public class ApiFilterHandler extends AbstractHandler {
   public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
     String apiRootPath = config.getApiRootPath();
     if(!target.startsWith(apiRootPath)){
-      // Avoid any non api request
+      // Ignore any non api request
       return;
     }
     apiHandler.handle(target,baseRequest,request,response);

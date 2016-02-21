@@ -1,4 +1,4 @@
-package ar.com.kfgodel.webbyconvention;
+package ar.com.kfgodel.webbyconvention.config;
 
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 

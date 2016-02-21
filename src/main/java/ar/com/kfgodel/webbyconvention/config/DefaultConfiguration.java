@@ -1,5 +1,6 @@
-package ar.com.kfgodel.webbyconvention;
+package ar.com.kfgodel.webbyconvention.config;
 
+import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
 import com.google.common.collect.Lists;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;

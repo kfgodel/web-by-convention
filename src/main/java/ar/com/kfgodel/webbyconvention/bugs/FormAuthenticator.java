@@ -1,5 +1,6 @@
-package ar.com.kfgodel.webbyconvention.auth;
+package ar.com.kfgodel.webbyconvention.bugs;
 
+import ar.com.kfgodel.webbyconvention.auth.WebUserIdentification;
 import org.eclipse.jetty.http.*;
 import org.eclipse.jetty.security.ServerAuthException;
 import org.eclipse.jetty.security.UserAuthentication;

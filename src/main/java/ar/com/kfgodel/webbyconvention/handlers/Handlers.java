@@ -1,4 +1,4 @@
-package ar.com.kfgodel.webbyconvention.auth.impl;
+package ar.com.kfgodel.webbyconvention.handlers;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.HandlerList;
