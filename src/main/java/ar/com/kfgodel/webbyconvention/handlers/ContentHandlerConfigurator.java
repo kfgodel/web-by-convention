@@ -77,6 +77,8 @@ public class ContentHandlerConfigurator {
     if (annotatedResources.isEmpty()) {
       LOG.info("No resources annotated with " + Path.class + " found in[" + config.getApiResourcesPackage() + "]");
       return Optional.empty();
+    }else{
+      LOG.info("Found {} rest types: {}", annotatedResources.size(), annotatedResources);
     }
 
     ResourceConfig jerseyConfig = new ResourceConfig(annotatedResources);
