@@ -257,6 +257,14 @@ of a fixed location is recommended. -->
         <artifactId>reflections</artifactId>
         <version>${version.reflections}</version>
     </dependency>
+
+    <!-- Follow knwon conventions -->
+    <dependency>
+        <groupId>ar.com.kfgodel</groupId>
+        <artifactId>by-convention</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
         <groupId>org.slf4j</groupId>
