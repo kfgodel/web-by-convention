@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-<groupId>ar.com.kfgodel</groupId>
-<artifactId>web-by-convention</artifactId>
-<version>0.2-SNAPSHOT</version>
-<name>WebByConvention</name>
-<description>Pre-configured Jetty server to write web apps really easily (using convention over configuration)</description>
+  <groupId>ar.com.kfgodel</groupId>
+  <artifactId>web-by-convention</artifactId>
+  <version>0.2-SNAPSHOT</version>
+  <name>WebByConvention</name>
+  <description>Pre-configured Jetty server to write web apps really easily (using convention over configuration)
+  </description>
 
 
-<scm>
+  <scm>
     <connection>scm:git:ssh://github.com/kfgodel/web-by-convention.git</connection>
     <developerConnection>scm:git:ssh://github.com/kfgodel/web-by-convention.git</developerConnection>
     <url>https://github.com/kfgodel/web-by-convention</url>
-</scm>
+  </scm>
 
-<properties>
+  <properties>
     <project.java.source>1.8</project.java.source>
     <project.java.target>1.8</project.java.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,287 +62,293 @@ of a fixed location is recommended. -->
     most cases. -->
     <sonar.jacoco.itReportPath>${env.WORKSPACE}/target/${jacoco.out.file}</sonar.jacoco.itReportPath>
 
-</properties>
+  </properties>
 
 
-<build>
+  <build>
     <plugins>
 
-        <!-- Genera los binarios -->
-        <plugin>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>${version.plugin.compiler}</version>
+      <!-- Genera los binarios -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${version.plugin.compiler}</version>
+        <configuration>
+          <source>${project.java.source}</source>
+          <target>${project.java.target}</target>
+          <debug>true</debug>
+          <!-- This parameter enables parameter name preservation -->
+          <compilerArgument>-parameters</compilerArgument>
+        </configuration>
+      </plugin>
+
+      <!-- Corre los tests unitarios *Test -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${version.plugin.surefire}</version>
+        <configuration>
+          <!-- Adds the line argument to dump jacoco file where expected -->
+          <argLine>${jacoco.agent.arg}</argLine>
+        </configuration>
+      </plugin>
+
+      <!-- Corre los tests de integracion *IT -->
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${version.plugin.failsafe}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
             <configuration>
-                <source>${project.java.source}</source>
-                <target>${project.java.target}</target>
-                <debug>true</debug>
-                <!-- This parameter enables parameter name preservation -->
-                <compilerArgument>-parameters</compilerArgument>
+              <!-- Adds the line argument to dump jacoco file where expected -->
+              <argLine>${jacoco.agent.arg}</argLine>
             </configuration>
-        </plugin>
+          </execution>
+        </executions>
+      </plugin>
 
-        <!-- Corre los tests unitarios *Test -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${version.plugin.surefire}</version>
+      <!-- Recopila info de cobertura para los tests -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${version.jacoco}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
             <configuration>
-                <!-- Adds the line argument to dump jacoco file where expected -->
-                <argLine>${jacoco.agent.arg}</argLine>
+              <destFile>${jacoco.out.path}/${jacoco.out.file}</destFile>
+              <propertyName>jacoco.agent.arg</propertyName>
             </configuration>
-        </plugin>
-
-        <!-- Corre los tests de integracion *IT -->
-        <plugin>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${version.plugin.failsafe}</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>integration-test</goal>
-                        <goal>verify</goal>
-                    </goals>
-                    <configuration>
-                        <!-- Adds the line argument to dump jacoco file where expected -->
-                        <argLine>${jacoco.agent.arg}</argLine>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-
-        <!-- Recopila info de cobertura para los tests -->
-        <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${version.jacoco}</version>
-            <executions>
-                <execution>
-                    <id>prepare-agent</id>
-                    <goals>
-                        <goal>prepare-agent</goal>
-                    </goals>
-                    <configuration>
-                        <destFile>${jacoco.out.path}/${jacoco.out.file}</destFile>
-                        <propertyName>jacoco.agent.arg</propertyName>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
+          </execution>
+        </executions>
+      </plugin>
 
 
+      <!-- Los empaqueta en jars -->
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${version.plugin.jar}</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+            </manifest>
+            <manifestEntries>
+              <Build-JVM>${java.vm.name} - ${java.vm.vendor}</Build-JVM>
+              <Build-OS>${os.name} - Version: ${os.version}</Build-OS>
+              <Application-GroupId>${project.groupId}</Application-GroupId>
+              <Application-Artifact>${project.artifactId}</Application-Artifact>
+              <Application-Version>${project.version}</Application-Version>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
 
-        <!-- Los empaqueta en jars -->
-        <plugin>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>${version.plugin.jar}</version>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <addClasspath>true</addClasspath>
-                    </manifest>
-                    <manifestEntries>
-                        <Build-JVM>${java.vm.name} - ${java.vm.vendor}</Build-JVM>
-                        <Build-OS>${os.name} - Version: ${os.version}</Build-OS>
-                        <Application-GroupId>${project.groupId}</Application-GroupId>
-                        <Application-Artifact>${project.artifactId}</Application-Artifact>
-                        <Application-Version>${project.version}</Application-Version>
-                    </manifestEntries>
-                </archive>
-            </configuration>
-        </plugin>
+      <!-- Attachea los fuentes como jar -->
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${version.plugin.source}</version>
+        <executions>
+          <execution>
+            <id>attach-source</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-        <!-- Attachea los fuentes como jar -->
-        <plugin>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>${version.plugin.source}</version>
-            <executions>
-                <execution>
-                    <id>attach-source</id>
-                    <phase>verify</phase>
-                    <goals>
-                        <goal>jar-no-fork</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-
-        <!-- Permite configurar el proyecto en eclipse -->
-        <plugin>
-            <artifactId>maven-eclipse-plugin</artifactId>
-            <version>${version.plugin.eclipse}</version>
-            <configuration>
-                <downloadSources>true</downloadSources>
-            </configuration>
-        </plugin>
+      <!-- Permite configurar el proyecto en eclipse -->
+      <plugin>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <version>${version.plugin.eclipse}</version>
+        <configuration>
+          <downloadSources>true</downloadSources>
+        </configuration>
+      </plugin>
 
     </plugins>
-</build>
+  </build>
 
-<repositories>
+  <repositories>
     <repository>
-        <releases>
-            <updatePolicy>never</updatePolicy>
-        </releases>
-        <snapshots>
-            <updatePolicy>always</updatePolicy>
-        </snapshots>
-        <id>kfgodel_mosquito</id>
-        <name>Repo Mosquito</name>
-        <url>http://kfgodel.info:8081/nexus/content/groups/public/</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <id>kfgodel_mosquito</id>
+      <name>Repo Mosquito</name>
+      <url>http://kfgodel.info:8081/nexus/content/groups/public/</url>
     </repository>
-</repositories>
-<pluginRepositories>
+  </repositories>
+  <pluginRepositories>
     <pluginRepository>
-        <releases>
-            <updatePolicy>never</updatePolicy>
-        </releases>
-        <snapshots>
-            <updatePolicy>always</updatePolicy>
-        </snapshots>
-        <id>kfgodel_mosquito</id>
-        <name>Repo Mosquito</name>
-        <url>http://kfgodel.info:8081/nexus/content/groups/public/</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <id>kfgodel_mosquito</id>
+      <name>Repo Mosquito</name>
+      <url>http://kfgodel.info:8081/nexus/content/groups/public/</url>
     </pluginRepository>
-</pluginRepositories>
+  </pluginRepositories>
 
-<dependencies>
+  <dependencies>
 
     <!-- Servidor http embebido -->
     <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-server</artifactId>
-        <version>${version.jetty}</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${version.jetty}</version>
     </dependency>
     <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-security</artifactId>
-        <version>${version.jetty}</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+      <version>${version.jetty}</version>
     </dependency>
 
     <!-- REST API simple -->
     <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-jetty-http</artifactId>
-        <version>${version.jersey}</version>
-        <exclusions>
-            <!-- Avoid version problem with jetty -->
-            <exclusion>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-util</artifactId>
-            </exclusion>
-            <exclusion>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-continuation</artifactId>
-            </exclusion>
-        </exclusions>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-jetty-http</artifactId>
+      <version>${version.jersey}</version>
+      <exclusions>
+        <!-- Avoid version problem with jetty -->
+        <exclusion>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-util</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-continuation</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-util</artifactId>
-        <version>${version.jetty}</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>${version.jetty}</version>
     </dependency>
     <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-continuation</artifactId>
-        <version>${version.jetty}</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-continuation</artifactId>
+      <version>${version.jetty}</version>
     </dependency>
 
     <!-- Json support for rest -->
     <dependency>
-        <groupId>org.glassfish.jersey.media</groupId>
-        <artifactId>jersey-media-json-jackson</artifactId>
-        <version>${version.jersey}</version>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>${version.jersey}</version>
     </dependency>
     <!-- Discover resource classes dinamically -->
     <dependency>
-        <groupId>org.reflections</groupId>
-        <artifactId>reflections</artifactId>
-        <version>${version.reflections}</version>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>${version.reflections}</version>
     </dependency>
 
     <!-- Follow knwon conventions -->
     <dependency>
-        <groupId>ar.com.kfgodel</groupId>
-        <artifactId>by-convention</artifactId>
-        <version>0.1-SNAPSHOT</version>
+      <groupId>ar.com.kfgodel</groupId>
+      <artifactId>by-convention</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+
+    <!-- allows uncertain amount representation -->
+    <dependency>
+      <groupId>ar.com.kfgodel</groupId>
+      <artifactId>nary</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- Logging -->
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${version.slf4j}</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${version.slf4j}</version>
     </dependency>
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jcl-over-slf4j</artifactId>
-        <version>${version.slf4j}</version>
-        <scope>runtime</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${version.slf4j}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>log4j-over-slf4j</artifactId>
-        <version>${version.slf4j}</version>
-        <scope>runtime</scope>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>${version.slf4j}</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-        <version>${version.logback}</version>
-        <scope>test</scope>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>${version.logback}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>${version.logback}</version>
-        <scope>test</scope>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${version.logback}</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Testing -->
     <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${version.junit}</version>
-        <scope>test</scope>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${version.junit}</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Nice assertions -->
     <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${version.assertj}</version>
-        <scope>test</scope>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${version.assertj}</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Spec for testing -->
     <dependency>
-        <groupId>ar.com.dgarcia</groupId>
-        <artifactId>java-spec</artifactId>
-        <version>${version.javaspec}</version>
-        <scope>test</scope>
+      <groupId>ar.com.dgarcia</groupId>
+      <artifactId>java-spec</artifactId>
+      <version>${version.javaspec}</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Mock for testing -->
     <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>${version.mockito}</version>
-        <scope>test</scope>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>${version.mockito}</version>
+      <scope>test</scope>
     </dependency>
 
-</dependencies>
+  </dependencies>
 
-    <distributionManagement>
-        <repository>
-            <id>kfgodel_mosquito</id>
-            <name>Internal Releases</name>
-            <url>http://kfgodel.info:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>kfgodel_mosquito</id>
-            <name>Internal Snapshots</name>
-            <url>http://kfgodel.info:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+  <distributionManagement>
+    <repository>
+      <id>kfgodel_mosquito</id>
+      <name>Internal Releases</name>
+      <url>http://kfgodel.info:8081/nexus/content/repositories/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>kfgodel_mosquito</id>
+      <name>Internal Snapshots</name>
+      <url>http://kfgodel.info:8081/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 
 </project>

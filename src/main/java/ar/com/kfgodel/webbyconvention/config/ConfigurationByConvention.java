@@ -1,6 +1,7 @@
 package ar.com.kfgodel.webbyconvention.config;
 
 import ar.com.kfgodel.convention.api.Convention;
+import ar.com.kfgodel.nary.api.Nary;
 import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This type represents the defaul configuration with sensitive values for all the parameters.
@@ -19,13 +21,13 @@ import java.util.function.Function;
 public class ConfigurationByConvention implements WebServerConfiguration {
 
   private int httpPort;
-  private List<String> refreshableContent;
+  private List<String> refreshableWebFolders;
   private String webFolderInClassPath;
-  private String apiResourcesPackage;
+  private List<String> apiResourcesPackage;
   private Consumer<AbstractBinder> injectionConfiguration;
   private Function<WebCredential, Optional<Object>> authenticatorFunction;
   private int sessionTimeout;
-  private String apiRootUrl;
+  private List<String> apiRootUrl;
 
   private Optional<Object> authenticateAll(WebCredential webCredential) {
     // We allow access to every login attempt
@@ -41,9 +43,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     return httpPort;
   }
 
-  @Override
-  public List<String> getRefreshableContent() {
-    return refreshableContent;
+  public Nary<String> getRefreshableWebFolders() {
+    return Nary.create(refreshableWebFolders);
   }
 
   @Override
@@ -52,12 +53,12 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   }
 
   @Override
-  public String getApiResourcesPackage() {
-    return apiResourcesPackage;
+  public Nary<String> getApiResourcesPackage() {
+    return Nary.create(apiResourcesPackage);
   }
 
   @Override
-  public Consumer<AbstractBinder> getInjectionConfiguration() {
+  public Consumer<AbstractBinder> getInjectionConfigurator() {
     return injectionConfiguration;
   }
 
@@ -72,8 +73,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   }
 
   @Override
-  public String getApiRootPath() {
-    return apiRootUrl;
+  public Nary<String> getApiRootPath() {
+    return Nary.create(apiRootUrl);
   }
 
   public static ConfigurationByConvention create() {
@@ -88,7 +89,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     this.apiRootUrl = convention.getRestApiRootUrl();
     this.apiResourcesPackage = convention.getRestApiRootPackageName();
     this.webFolderInClassPath = convention.getWebFolderInClasspath();
-    this.refreshableContent = convention.getWebFoldersInSources();
+    this.refreshableWebFolders = convention.getWebFoldersInSources();
     this.injectionConfiguration = this::noBinding;
     this.authenticatorFunction = this::authenticateAll;
     this.sessionTimeout = (int) TimeUnit.MINUTES.toSeconds(30);
@@ -111,8 +112,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param newContent The list of folders to look for changes
    * @return This instance for call chaining
    */
-  public ConfigurationByConvention withRefreshableContentIn(List<String> newContent) {
-    this.refreshableContent = newContent;
+  public ConfigurationByConvention withRefreshableContentIn(Nary<String> newContent) {
+    this.refreshableWebFolders = newContent.collect(Collectors.toList());
     return this;
   }
 
@@ -133,8 +134,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param annotatedResourcesPackage The package were jersey api resource classes are
    * @return This instance to chain calls
    */
-  public ConfigurationByConvention withResourcesFrom(String annotatedResourcesPackage) {
-    this.apiResourcesPackage = annotatedResourcesPackage;
+  public ConfigurationByConvention withResourcesFrom(Nary<String> annotatedResourcesPackage) {
+    this.apiResourcesPackage = annotatedResourcesPackage.collect(Collectors.toList());
     return this;
   }
 
@@ -167,8 +168,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param parentPath The parent url
    * @return This instance for chaining methods
    */
-  public ConfigurationByConvention withApiUnder(String parentPath) {
-    this.apiRootUrl = parentPath;
+  public ConfigurationByConvention withApiUnder(Nary<String> parentPath) {
+    this.apiRootUrl = parentPath.collect(Collectors.toList());
     return this;
   }
 

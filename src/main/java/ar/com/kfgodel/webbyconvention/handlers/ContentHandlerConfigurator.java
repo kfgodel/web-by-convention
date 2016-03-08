@@ -1,8 +1,9 @@
 package ar.com.kfgodel.webbyconvention.handlers;
 
-import ar.com.kfgodel.webbyconvention.config.ConfigurableInjectionBinder;
+import ar.com.kfgodel.nary.api.Nary;
 import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.bugs.NonLockingResourceHandler;
+import ar.com.kfgodel.webbyconvention.config.ConfigurableInjectionBinder;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.Resource;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.Path;
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -72,8 +74,7 @@ public class ContentHandlerConfigurator {
    */
   private Optional<Handler> createApiHandler() {
 
-    Reflections reflections = new Reflections(config.getApiResourcesPackage());
-    Set<Class<?>> annotatedResources = reflections.getTypesAnnotatedWith(Path.class);
+    Set<Class<?>> annotatedResources = discoverAnnotatedResources();
     if (annotatedResources.isEmpty()) {
       LOG.info("No resources annotated with " + Path.class + " found in[" + config.getApiResourcesPackage() + "]");
       return Optional.empty();
@@ -83,7 +84,7 @@ public class ContentHandlerConfigurator {
 
     ResourceConfig jerseyConfig = new ResourceConfig(annotatedResources);
     //Configure dependency injection for resources
-    jerseyConfig.register(ConfigurableInjectionBinder.create(this.config.getInjectionConfiguration()));
+    jerseyConfig.register(ConfigurableInjectionBinder.create(this.config.getInjectionConfigurator()));
     // Activate tracing log on requests
 //        headers: {
 //            "X-Jersey-Tracing-Accept": 'true', // Any value is ok
@@ -101,6 +102,28 @@ public class ContentHandlerConfigurator {
   }
 
   /**
+   * Explores all the api packages to discover annotated classes to be declared as rest resources
+   * @return The set of types annotated with @Path
+   */
+  private Set<Class<?>> discoverAnnotatedResources() {
+    Nary<String> resourcePackages = config.getApiResourcesPackage();
+    return resourcePackages
+      .flatMap(this::getAnnotatedResourcesIn)
+      .collect(Collectors.toSet());
+  }
+
+  /**
+   * Explores the types inside the given package to discover @Path annotated types
+   * @param resourcePackage The root package to explore
+   * @return The stream of annotated types inside the package or subpackages
+   */
+  private Stream<? extends Class<?>> getAnnotatedResourcesIn(String resourcePackage) {
+    Reflections reflections = new Reflections(resourcePackage);
+    Set<Class<?>> typesAnnotatedWithPath = reflections.getTypesAnnotatedWith(Path.class);
+    return typesAnnotatedWithPath.stream();
+  }
+
+  /**
    * Serve static content from the classpath (bundled with the app)
    */
   private Handler createStaticContentHandler() {
@@ -114,8 +137,8 @@ public class ContentHandlerConfigurator {
    * Make certain locations served from source folders to be updated in development (useful while developing)
    */
   private Stream<Handler> createDynamicContentHandlers() {
-    List<String> refreshableSources = config.getRefreshableContent();
-    return refreshableSources.stream()
+    Nary<String> refreshableSources = config.getRefreshableWebFolders();
+    return refreshableSources
       .filter((refreshableSource)-> new File(refreshableSource).exists())
       .map(this::createDynamicContentHandler);
   }

@@ -1,9 +1,9 @@
 package ar.com.kfgodel.webbyconvention;
 
+import ar.com.kfgodel.nary.api.Nary;
 import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,35 +21,14 @@ public interface WebServerConfiguration {
   int getHttpPort();
 
   /**
-   * @return The list of folders with resources that may change during development.
-   * The server will serve the files directly allowing updates to be refreshed
+   * @return A code lambda that will set up the injection bindings for dependency injection
+   * in the resources
    */
-  List<String> getRefreshableContent();
-
-  /**
-   * @return The classpath folder that holds all the web content
-   */
-  String getWebFolderInClasspath();
-
-  /**
-   * @return The package in the classpath that holds jersey annotated resources to expose as api
-   */
-  String getApiResourcesPackage();
-
-  /**
-   * @return The url segment that serves as root for all the api requests
-   */
-  String getApiRootPath();
-
-
-  /**
-   * @return The code to setup injection bindings for the jersey resources
-   */
-  Consumer<AbstractBinder> getInjectionConfiguration();
+  Consumer<AbstractBinder> getInjectionConfigurator();
 
   /**
    * The function used to authenticate user credentials given to the web server.<br>
-   * The function receive a credential object for every authentication attempt and returns
+   * This function receives a credential object for every authentication attempt and returns
    * an empty optional for failed authentication, or an object for successful ones.<br>
    * <br>
    * The returned object can be used later to identify the authenticated user, and it's available
@@ -65,5 +44,27 @@ public interface WebServerConfiguration {
    * After that user will have to re-login
    */
   int getSessionTimeout();
+
+  /**
+   * @return The list of folders with resources that may change during development.
+   * The server will serve the files directly allowing updates to be refreshed
+   */
+  Nary<String> getRefreshableWebFolders();
+
+  /**
+   * @return The classpath folders that hold web content to be served
+   */
+  String getWebFolderInClasspath();
+
+  /**
+   * @return The package in the classpath that holds jersey annotated resources to expose as api
+   */
+  Nary<String> getApiResourcesPackage();
+
+  /**
+   * @return The url segment that serves as root for all the api requests
+   */
+  Nary<String> getApiRootPath();
+
 
 }

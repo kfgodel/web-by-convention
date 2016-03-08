@@ -1,8 +1,8 @@
 package ar.com.kfgodel.webbyconvention.handlers;
 
 import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
-import ar.com.kfgodel.webbyconvention.bugs.FormAuthenticator;
 import ar.com.kfgodel.webbyconvention.auth.WebLoginService;
+import ar.com.kfgodel.webbyconvention.bugs.FormAuthenticator;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;
@@ -10,8 +10,8 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.security.Constraint;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This type represents the handler securizer that ensures that sensible requests are authenticated
@@ -89,11 +89,27 @@ public class ContentSecurizer {
     constraint.setAuthenticate(true);
     constraint.setRoles(new String[]{"user"});
 
+    return createContraintedUrlMappings(constraint);
+  }
+
+  private List<ConstraintMapping> createContraintedUrlMappings(Constraint constraint) {
+    return config.getApiRootPath()
+      .map((apiRootPath)-> createMappingFor(constraint, apiRootPath))
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Creates a contrainted url mapping that enforces security restrictions over the url root
+   * @param constraint The type of restriction
+   * @param rootPath The root url
+   * @return The contrainted mapping
+   */
+  private ConstraintMapping createMappingFor(Constraint constraint, String rootPath) {
     // Binds a url pattern with the previously created constraint. The roles for this constraing mapping are
     // mined from the Constraint itself although methods exist to declare and bind roles separately as well.
     ConstraintMapping mapping = new ConstraintMapping();
-    mapping.setPathSpec(config.getApiRootPath() + "/*");
+    mapping.setPathSpec(rootPath + "/*");
     mapping.setConstraint(constraint);
-    return Collections.singletonList(mapping);
+    return mapping;
   }
 }
