@@ -1,9 +1,9 @@
-package ar.com.kfgodel.webbyconvention.handlers;
+package ar.com.kfgodel.webbyconvention.impl.handlers;
 
 import ar.com.kfgodel.nary.api.Nary;
-import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.bugs.NonLockingResourceHandler;
-import ar.com.kfgodel.webbyconvention.config.ConfigurableInjectionBinder;
+import ar.com.kfgodel.webbyconvention.impl.config.ConfigurableInjectionBinder;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.Resource;

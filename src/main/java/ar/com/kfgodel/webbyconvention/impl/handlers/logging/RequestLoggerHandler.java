@@ -1,4 +1,4 @@
-package ar.com.kfgodel.webbyconvention.logging;
+package ar.com.kfgodel.webbyconvention.impl.handlers.logging;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;

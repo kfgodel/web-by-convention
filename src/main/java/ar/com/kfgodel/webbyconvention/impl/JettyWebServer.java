@@ -1,9 +1,9 @@
-package ar.com.kfgodel.webbyconvention.server;
+package ar.com.kfgodel.webbyconvention.impl;
 
-import ar.com.kfgodel.webbyconvention.WebServer;
-import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
-import ar.com.kfgodel.webbyconvention.WebServerException;
-import ar.com.kfgodel.webbyconvention.handlers.HandlerOrchestrator;
+import ar.com.kfgodel.webbyconvention.api.WebServer;
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
+import ar.com.kfgodel.webbyconvention.api.exceptions.WebServerException;
+import ar.com.kfgodel.webbyconvention.impl.handlers.HandlerOrchestrator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 

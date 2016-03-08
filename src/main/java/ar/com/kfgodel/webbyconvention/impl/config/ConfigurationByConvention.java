@@ -1,9 +1,9 @@
-package ar.com.kfgodel.webbyconvention.config;
+package ar.com.kfgodel.webbyconvention.impl.config;
 
 import ar.com.kfgodel.convention.api.Convention;
 import ar.com.kfgodel.nary.api.Nary;
-import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
-import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
+import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.List;

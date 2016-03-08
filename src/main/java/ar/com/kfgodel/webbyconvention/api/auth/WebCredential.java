@@ -1,4 +1,4 @@
-package ar.com.kfgodel.webbyconvention.auth.api;
+package ar.com.kfgodel.webbyconvention.api.auth;
 
 /**
  * This type represents the credentials presented by users through the web server to

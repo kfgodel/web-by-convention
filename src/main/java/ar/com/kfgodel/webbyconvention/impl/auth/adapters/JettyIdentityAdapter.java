@@ -1,19 +1,20 @@
-package ar.com.kfgodel.webbyconvention.auth;
+package ar.com.kfgodel.webbyconvention.impl.auth.adapters;
 
-import ar.com.kfgodel.webbyconvention.WebServerException;
+import ar.com.kfgodel.webbyconvention.api.exceptions.WebServerException;
 import org.eclipse.jetty.server.UserIdentity;
 
 import javax.security.auth.Subject;
 import java.security.Principal;
 
 /**
- * This type represents the user identity of a logged user for the web server.<br>
- *     This instance is also used as principal to simplify the amount of objects.<br>
- *     This identity is responsible of validating roles for users, but it allows any role (assuming only "user" role is needed)
+ * This type represents the user identity of a logged in user for the web server.<br>
+ *  This instance is also used as principal to simplify the interactions.<br>
+ *  This identity is responsible of validating roles for users, however its implementation allows
+ *  any role (assuming only "user" role is needed)
  *
  * Created by kfgodel on 27/03/15.
  */
-public class WebUserIdentification implements UserIdentity, Principal {
+public class JettyIdentityAdapter implements UserIdentity, Principal {
 
     private Object appIdentification;
 
@@ -47,8 +48,8 @@ public class WebUserIdentification implements UserIdentity, Principal {
         return (T) appIdentification;
     }
 
-    public static WebUserIdentification create(Object applicationIdentification) {
-        WebUserIdentification userIdentity = new WebUserIdentification();
+    public static JettyIdentityAdapter create(Object applicationIdentification) {
+        JettyIdentityAdapter userIdentity = new JettyIdentityAdapter();
         userIdentity.appIdentification = applicationIdentification;
         return userIdentity;
     }

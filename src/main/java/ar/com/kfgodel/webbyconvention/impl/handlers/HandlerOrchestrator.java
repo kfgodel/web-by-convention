@@ -1,7 +1,7 @@
-package ar.com.kfgodel.webbyconvention.handlers;
+package ar.com.kfgodel.webbyconvention.impl.handlers;
 
-import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
-import ar.com.kfgodel.webbyconvention.logging.RequestLoggerHandler;
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
+import ar.com.kfgodel.webbyconvention.impl.handlers.logging.RequestLoggerHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.HandlerList;
 

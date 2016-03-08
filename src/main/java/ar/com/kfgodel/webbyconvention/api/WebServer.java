@@ -1,4 +1,7 @@
-package ar.com.kfgodel.webbyconvention;
+package ar.com.kfgodel.webbyconvention.api;
+
+
+import ar.com.kfgodel.webbyconvention.api.exceptions.WebServerException;
 
 /**
  * This type represents an integrated web server

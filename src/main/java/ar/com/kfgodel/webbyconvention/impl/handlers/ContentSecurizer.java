@@ -1,8 +1,8 @@
-package ar.com.kfgodel.webbyconvention.handlers;
+package ar.com.kfgodel.webbyconvention.impl.handlers;
 
-import ar.com.kfgodel.webbyconvention.WebServerConfiguration;
-import ar.com.kfgodel.webbyconvention.auth.WebLoginService;
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.bugs.FormAuthenticator;
+import ar.com.kfgodel.webbyconvention.impl.auth.adapters.AuthenticatorFunctionLoginService;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;
@@ -73,7 +73,7 @@ public class ContentSecurizer {
 
     // Finally a login service is used by the chosen authenticator to authenticate a user against the application code
     // This login service uses the function given by the webServer config
-    LoginService loginService = WebLoginService.create(config.getAuthenticatorFunction());
+    LoginService loginService = AuthenticatorFunctionLoginService.create(config.getAuthenticatorFunction());
     security.setLoginService(loginService);
 
     // Wrap the unsecure handlers into the secure handlers

@@ -1,7 +1,7 @@
-package ar.com.kfgodel.webbyconvention;
+package ar.com.kfgodel.webbyconvention.api.config;
 
 import ar.com.kfgodel.nary.api.Nary;
-import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
+import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package ar.com.kfgodel.webbyconvention;
+package ar.com.kfgodel.webbyconvention.api.exceptions;
 
 /**
  * This type represents an error in the web server

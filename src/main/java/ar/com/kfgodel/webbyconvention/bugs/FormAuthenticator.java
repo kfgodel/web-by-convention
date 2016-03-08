@@ -1,6 +1,6 @@
 package ar.com.kfgodel.webbyconvention.bugs;
 
-import ar.com.kfgodel.webbyconvention.auth.WebUserIdentification;
+import ar.com.kfgodel.webbyconvention.impl.auth.adapters.JettyIdentityAdapter;
 import org.eclipse.jetty.http.*;
 import org.eclipse.jetty.security.ServerAuthException;
 import org.eclipse.jetty.security.UserAuthentication;
@@ -274,7 +274,7 @@ public class FormAuthenticator extends LoginAuthenticator
                     LOG.debug("authenticated {}->{}",form_auth,nuri);
 
                     // This is the only type we use
-                    WebUserIdentification identification = (WebUserIdentification) form_auth.getUserIdentity();
+                    JettyIdentityAdapter identification = (JettyIdentityAdapter) form_auth.getUserIdentity();
                     Object applicationIdentification = (Object) identification.getApplicationIdentification();
 
                     // Do a 200 OK instead of 303 redirect to main page

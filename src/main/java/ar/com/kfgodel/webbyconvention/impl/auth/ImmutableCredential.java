@@ -1,6 +1,7 @@
-package ar.com.kfgodel.webbyconvention.auth.impl;
+package ar.com.kfgodel.webbyconvention.impl.auth;
 
-import ar.com.kfgodel.webbyconvention.auth.api.WebCredential;
+
+import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
 
 /**
  * This Type implements the web credentials as an immutable object
