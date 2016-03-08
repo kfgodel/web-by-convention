@@ -10,7 +10,7 @@ import ar.com.kfgodel.webbyconvention.impl.auth.identity.ThreadLocalIdentityServ
  * current thread as a local variable. This identiti is managed by the ThreadLocalIdentityService
  * Created by kfgodel on 29/03/15.
  */
-public interface WebUserId {
+public interface LoggedUser {
 
 
     /**
@@ -20,7 +20,7 @@ public interface WebUserId {
      * @param <T> The type of expected id
      * @return The generated id, or an empty optional if this thread has no authenticated id
      */
-    public static <T> Optional<T> getLoggedIn(){
+    static <T> Optional<T> getAppId(){
         return ThreadLocalIdentityService.getFromThread()
           .mapNary(JettyIdentityAdapter::getApplicationIdentification);
     }
