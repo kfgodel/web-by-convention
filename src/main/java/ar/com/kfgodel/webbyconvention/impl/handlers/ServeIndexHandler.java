@@ -30,6 +30,10 @@ public class ServeIndexHandler extends ResourceHandler {
     try{
       String pathInContext= URIUtil.addPaths("","/");
       Resource rootUrl = getResource(pathInContext);
+      if(rootUrl == null){
+        // Null represents absence for jetty (avoids NPE for favicon)
+        return null;
+      }
       Resource indexResource = getWelcome(rootUrl);
       return indexResource;
     }catch (IOException e){
