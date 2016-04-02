@@ -6,6 +6,7 @@ import ar.com.kfgodel.webbyconvention.impl.config.ConfigurationByConvention;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -63,9 +64,9 @@ public interface WebServerConfiguration {
   Nary<String> getApiResourcesPackage();
 
   /**
-   * @return The url segment that serves as root for all the api requests
+   * @return The url root paths where api requests are served
    */
-  Nary<String> getApiRootPath();
+  Nary<String> getApiRootPaths();
 
 
   /**
@@ -137,7 +138,8 @@ public interface WebServerConfiguration {
   ConfigurationByConvention expiringSessionsAfter(int seconds);
 
   /**
-   * Changes the default location of api resources as published to the client
+   * Changes the default url location for api resources as published to the client.<br>
+   *   This urls are where resources are published and where authentication may be needed (by default)
    *
    * @param parentPath The url paths where resources are located
    * @return This instance to chain methods
@@ -151,4 +153,20 @@ public interface WebServerConfiguration {
    * @return This instance to chain methods
    */
   WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction);
+
+  /**
+   * Changes the default by convention resource classes that are discovered on runtime from
+   * classes annotated with {@link javax.ws.rs.Path} from the api packages
+   *
+   * @param resourceClasses The set of classes to use as http resources
+   * @return This instance to chain methods
+   */
+  WebServerConfiguration overridingResourceClassesWith(Nary<Class<?>> resourceClasses);
+
+  /**
+   * @return The set of classes that will be used as http resources. If default is not changed,
+   * api resource packages will be explored to look for classes annotated with {@link javax.ws.rs.Path}
+   * recursively
+   */
+  Set<Class<?>> getApiResourceClasses();
 }

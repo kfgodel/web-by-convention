@@ -22,13 +22,16 @@ public class ApiFilterHandler extends AbstractHandler {
 
   @Override
   public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-    boolean isNotAnApiRequest = config.getApiRootPath()
-      .noneMatch(target::startsWith);
-    if(isNotAnApiRequest){
+    if (isNotAnApiRequest(target)) {
       // Ignore any non api request
       return;
     }
     apiHandler.handle(target,baseRequest,request,response);
+  }
+
+  private boolean isNotAnApiRequest(String target) {
+    return config.getApiRootPaths()
+      .noneMatch(target::startsWith);
   }
 
   public static ApiFilterHandler create(Handler apiHandler, WebServerConfiguration config) {

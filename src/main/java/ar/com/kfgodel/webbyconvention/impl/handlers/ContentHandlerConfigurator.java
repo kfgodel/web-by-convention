@@ -10,14 +10,12 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.glassfish.jersey.jetty.JettyHttpContainer;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Path;
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -74,9 +72,9 @@ public class ContentHandlerConfigurator {
    */
   private Optional<Handler> createApiHandler() {
 
-    Set<Class<?>> annotatedResources = discoverAnnotatedResources();
+    Set<Class<?>> annotatedResources = config.getApiResourceClasses();
     if (annotatedResources.isEmpty()) {
-      LOG.info("No resources annotated with " + Path.class + " found in[" + config.getApiResourcesPackage() + "]");
+      LOG.info("No resources annotated with " + Path.class + " found to publish on the web server");
       return Optional.empty();
     }else{
       LOG.info("Found {} rest types: {}", annotatedResources.size(), annotatedResources);
@@ -99,28 +97,6 @@ public class ContentHandlerConfigurator {
     final JettyHttpContainer jerseyHandler = ContainerFactory.createContainer(JettyHttpContainer.class, jerseyConfig);
     ApiFilterHandler filterHandler = ApiFilterHandler.create(jerseyHandler, config);
     return Optional.of(filterHandler);
-  }
-
-  /**
-   * Explores all the api packages to discover annotated classes to be declared as rest resources
-   * @return The set of types annotated with @Path
-   */
-  private Set<Class<?>> discoverAnnotatedResources() {
-    Nary<String> resourcePackages = config.getApiResourcesPackage();
-    return resourcePackages
-      .flatMap(this::getAnnotatedResourcesIn)
-      .collect(Collectors.toSet());
-  }
-
-  /**
-   * Explores the types inside the given package to discover @Path annotated types
-   * @param resourcePackage The root package to explore
-   * @return The stream of annotated types inside the package or subpackages
-   */
-  private Stream<? extends Class<?>> getAnnotatedResourcesIn(String resourcePackage) {
-    Reflections reflections = new Reflections(resourcePackage);
-    Set<Class<?>> typesAnnotatedWithPath = reflections.getTypesAnnotatedWith(Path.class);
-    return typesAnnotatedWithPath.stream();
   }
 
   /**

@@ -4,18 +4,24 @@ import ar.com.kfgodel.convention.api.Convention;
 import ar.com.kfgodel.nary.api.Nary;
 import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
 import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
+import ar.com.kfgodel.webbyconvention.api.exceptions.WebServerException;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.reflections.Reflections;
 
+import javax.ws.rs.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
- * This type represents the defaul configuration with sensitive values for all the parameters.
+ * This type represents the default configuration with sensitive values for all the parameters.
  * You will usually use this as is
  * Created by kfgodel on 03/03/15.
  */
@@ -28,8 +34,10 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   private Consumer<AbstractBinder> injectionConfiguration;
   private Function<WebCredential, Optional<Object>> authenticatorFunction;
   private int sessionTimeout;
-  private List<String> apiRootUrl;
-  private List<String> securedRoots;
+  private Set<String> apiRootPaths;
+  private Set<String> securedRoots;
+  private Set<Class<?>> apiResourceClasses;
+
 
   private Optional<Object> authenticateAll(WebCredential webCredential) {
     // We allow access to every login attempt
@@ -75,19 +83,46 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   }
 
   @Override
-  public Nary<String> getApiRootPath() {
-    return Nary.create(apiRootUrl);
+  public Nary<String> getApiRootPaths() {
+    if (apiRootPaths == null) {
+      apiRootPaths = discoverApiRootPaths();
+    }
+    return Nary.create(apiRootPaths);
   }
+
+  /**
+   * Finds the used api roots for the existing resource classes
+   *
+   * @return The different paths used for resources
+   */
+  private Set<String> discoverApiRootPaths() {
+    return this.getApiResourceClasses().stream()
+      .map(this::getPathFrom)
+      .collect(toSet());
+  }
+
+  private String getPathFrom(Class<?> resourceClass) {
+    Path annotation = resourceClass.getAnnotation(Path.class);
+    if (annotation == null) {
+      throw new WebServerException("A resource class doesn't have a @Path annotation, even after checking: " + resourceClass);
+    }
+    return annotation.value();
+  }
+
 
   @Override
   public Nary<String> geSecuredRootPaths() {
+    if (securedRoots == null) {
+      // Use the api urls by defautl
+      return getApiRootPaths();
+    }
     return Nary.create(securedRoots);
   }
 
   @Override
   public WebServerConfiguration withoutAuthentication() {
     this.authenticatorFunction = this::authenticateAll;
-    this.securedRoots = Collections.emptyList();
+    this.securedRoots = Collections.emptySet();
     return this;
   }
 
@@ -100,9 +135,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   private void initializeDefaults() {
     Convention convention = Convention.create();
     this.httpPort = convention.getHttpPort();
-    this.apiRootUrl = convention.getRestApiRootUrl();
     this.apiResourcesPackage = convention.getRestApiRootPackageName();
-    this.securedRoots = convention.getSecuredRooturls();
     this.webFolderInClassPath = convention.getWebFolderInClasspath();
     this.refreshableWebFolders = convention.getWebFoldersInSources();
     this.injectionConfiguration = this::noBinding;
@@ -130,7 +163,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    */
   @Override
   public ConfigurationByConvention withRefreshableContentIn(Nary<String> newContent) {
-    this.refreshableWebFolders = newContent.collect(Collectors.toList());
+    this.refreshableWebFolders = newContent.toList();
     return this;
   }
 
@@ -154,7 +187,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    */
   @Override
   public ConfigurationByConvention withResourcesFrom(Nary<String> annotatedResourcesPackage) {
-    this.apiResourcesPackage = annotatedResourcesPackage.collect(Collectors.toList());
+    this.apiResourcesPackage = annotatedResourcesPackage.toList();
     return this;
   }
 
@@ -191,7 +224,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    */
   @Override
   public ConfigurationByConvention withApiUnder(Nary<String> parentPath) {
-    this.apiRootUrl = parentPath.collect(Collectors.toList());
+    this.apiRootPaths = parentPath.toSet();
     return this;
   }
 
@@ -201,11 +234,50 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * will be used as the user id, available in a thread context through the WebAuthenticatedId class
    *
    * @param authenticationFunction The authentication function
-   * @return This isntance to allow method chaining
+   * @return This instance to allow method chaining
    */
   @Override
   public WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction) {
     this.authenticatorFunction = authenticationFunction;
+    return this;
+  }
+
+  @Override
+  public Set<Class<?>> getApiResourceClasses() {
+    if (apiResourceClasses == null) {
+      // Was not user defined use default
+      apiResourceClasses = discoverResourceClasses();
+    }
+    return apiResourceClasses;
+  }
+
+  /**
+   * Explores the api packages for classes usable as resources
+   *
+   * @return The set of resource classes
+   */
+  private Set<Class<?>> discoverResourceClasses() {
+    Nary<String> resourcePackages = this.getApiResourcesPackage();
+    return resourcePackages
+      .flatMap(this::getAnnotatedResourcesIn)
+      .collect(toSet());
+  }
+
+  /**
+   * Explores the types inside the given package to discover @Path annotated types
+   *
+   * @param resourcePackage The root package to explore
+   * @return The stream of annotated types inside the package or subpackages
+   */
+  private Stream<? extends Class<?>> getAnnotatedResourcesIn(String resourcePackage) {
+    Reflections reflections = new Reflections(resourcePackage);
+    Set<Class<?>> typesAnnotatedWithPath = reflections.getTypesAnnotatedWith(Path.class);
+    return typesAnnotatedWithPath.stream();
+  }
+
+  @Override
+  public WebServerConfiguration overridingResourceClassesWith(Nary<Class<?>> resourceClasses) {
+    this.apiResourceClasses = resourceClasses.toSet();
     return this;
   }
 }
