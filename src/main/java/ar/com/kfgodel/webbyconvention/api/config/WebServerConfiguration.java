@@ -2,6 +2,7 @@ package ar.com.kfgodel.webbyconvention.api.config;
 
 import ar.com.kfgodel.nary.api.Nary;
 import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
+import ar.com.kfgodel.webbyconvention.impl.config.ConfigurationByConvention;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import java.util.Optional;
@@ -67,4 +68,87 @@ public interface WebServerConfiguration {
   Nary<String> getApiRootPath();
 
 
+  /**
+   * @return The url roots that will be restricted to authenticated users
+   * Every url that start with any of this roots will need an authenticated user
+   */
+  Nary<String> geSecuredRootPaths();
+
+  /**
+   * Indicates that the server should not try to authenticate users (everything is anonymously accessible).
+   * So an authentication function that accepts everything is used and no url is secured.<br>
+   * This method is a shorthand version of defining an empty set of secured urls, and an always true
+   * authenticator function
+   *
+   * @return Thi instance for method chaining
+   */
+  WebServerConfiguration withoutAuthentication();
+
+  /**
+   * Changes the default by convention port in which teh server, serves http content
+   *
+   * @param newHttpPort The new port to be used
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention listeningHttpOn(int newHttpPort);
+
+  /**
+   * Changes the default by convention paths where static content is located while developing.<br>
+   * The locations indicated in this method will be not cached by the server to always use the latests
+   *
+   * @param newContent The classpath relative location where static content is located on development
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention withRefreshableContentIn(Nary<String> newContent);
+
+  /**
+   * Changes the default by convention classpath folder where content is served from.<br>
+   * This folder is used by the server to return static content to the http clients
+   *
+   * @param newFolder The folder that should be used
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention usingClasspathWebFolder(String newFolder);
+
+  /**
+   * Changes the default by convention packages where rest resources are defined.<br>
+   * This packages will be explored to find classes annotated with @Path to declare http resources
+   *
+   * @param annotatedResourcesPackage The new package names
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention withResourcesFrom(Nary<String> annotatedResourcesPackage);
+
+  /**
+   * Changes the default by convention bindings used to inject dependencies in the resources.<br>
+   * The given binder is the injection mechanism used by the server to manage dependencies
+   *
+   * @param binderConfig The code that defines how to define bindings
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention withInjections(Consumer<AbstractBinder> binderConfig);
+
+  /**
+   * Changes the default by convention session expiration time
+   *
+   * @param seconds The new time to wait for sessions
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention expiringSessionsAfter(int seconds);
+
+  /**
+   * Changes the default location of api resources as published to the client
+   *
+   * @param parentPath The url paths where resources are located
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention withApiUnder(Nary<String> parentPath);
+
+  /**
+   * Changes the default authentication function that validates credential to a user identificator object
+   *
+   * @param authenticationFunction The function to use when authenticating users
+   * @return This instance to chain methods
+   */
+  WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction);
 }

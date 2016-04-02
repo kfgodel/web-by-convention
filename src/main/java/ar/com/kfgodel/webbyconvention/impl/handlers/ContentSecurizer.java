@@ -93,7 +93,7 @@ public class ContentSecurizer {
   }
 
   private List<ConstraintMapping> createContraintedUrlMappings(Constraint constraint) {
-    return config.getApiRootPath()
+    return config.geSecuredRootPaths()
       .map((apiRootPath)-> createMappingFor(constraint, apiRootPath))
       .collect(Collectors.toList());
   }

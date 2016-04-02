@@ -6,6 +6,7 @@ import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
 import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   private Function<WebCredential, Optional<Object>> authenticatorFunction;
   private int sessionTimeout;
   private List<String> apiRootUrl;
+  private List<String> securedRoots;
 
   private Optional<Object> authenticateAll(WebCredential webCredential) {
     // We allow access to every login attempt
@@ -77,6 +79,18 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     return Nary.create(apiRootUrl);
   }
 
+  @Override
+  public Nary<String> geSecuredRootPaths() {
+    return Nary.create(securedRoots);
+  }
+
+  @Override
+  public WebServerConfiguration withoutAuthentication() {
+    this.authenticatorFunction = this::authenticateAll;
+    this.securedRoots = Collections.emptyList();
+    return this;
+  }
+
   public static ConfigurationByConvention create() {
     ConfigurationByConvention config = new ConfigurationByConvention();
     config.initializeDefaults();
@@ -88,6 +102,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     this.httpPort = convention.getHttpPort();
     this.apiRootUrl = convention.getRestApiRootUrl();
     this.apiResourcesPackage = convention.getRestApiRootPackageName();
+    this.securedRoots = convention.getSecuredRooturls();
     this.webFolderInClassPath = convention.getWebFolderInClasspath();
     this.refreshableWebFolders = convention.getWebFoldersInSources();
     this.injectionConfiguration = this::noBinding;
@@ -101,6 +116,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param newHttpPort New port number
    * @return Ths config to chain calls
    */
+  @Override
   public ConfigurationByConvention listeningHttpOn(int newHttpPort) {
     this.httpPort = newHttpPort;
     return this;
@@ -112,6 +128,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param newContent The list of folders to look for changes
    * @return This instance for call chaining
    */
+  @Override
   public ConfigurationByConvention withRefreshableContentIn(Nary<String> newContent) {
     this.refreshableWebFolders = newContent.collect(Collectors.toList());
     return this;
@@ -123,6 +140,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param newFolder The new location to look into the classpath
    * @return This instance to chain method calls
    */
+  @Override
   public ConfigurationByConvention usingClasspathWebFolder(String newFolder) {
     this.webFolderInClassPath = newFolder;
     return this;
@@ -134,6 +152,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param annotatedResourcesPackage The package were jersey api resource classes are
    * @return This instance to chain calls
    */
+  @Override
   public ConfigurationByConvention withResourcesFrom(Nary<String> annotatedResourcesPackage) {
     this.apiResourcesPackage = annotatedResourcesPackage.collect(Collectors.toList());
     return this;
@@ -145,6 +164,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param binderConfig The binder code to configure the binder instance
    * @return This instance for method chaining
    */
+  @Override
   public ConfigurationByConvention withInjections(Consumer<AbstractBinder> binderConfig) {
     this.injectionConfiguration = binderConfig;
     return this;
@@ -157,6 +177,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param seconds The amount of seconds to wait for next request
    * @return This instance for method chaining
    */
+  @Override
   public ConfigurationByConvention expiringSessionsAfter(int seconds) {
     this.sessionTimeout = seconds;
     return this;
@@ -168,6 +189,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param parentPath The parent url
    * @return This instance for chaining methods
    */
+  @Override
   public ConfigurationByConvention withApiUnder(Nary<String> parentPath) {
     this.apiRootUrl = parentPath.collect(Collectors.toList());
     return this;
@@ -181,6 +203,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @param authenticationFunction The authentication function
    * @return This isntance to allow method chaining
    */
+  @Override
   public WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction) {
     this.authenticatorFunction = authenticationFunction;
     return this;
