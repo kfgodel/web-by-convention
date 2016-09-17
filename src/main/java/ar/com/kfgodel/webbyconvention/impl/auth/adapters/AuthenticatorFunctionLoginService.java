@@ -13,60 +13,64 @@ import java.util.function.Function;
 
 /**
  * This type represents the web server login service, used by the web server to authenticate users.<br>
- *  It uses an authenticator function to log in users from credentials. This class acts as an adapter
- *  between the web server authentication layer, and the application login behavior
- *
+ * It uses an authenticator function to log in users from credentials. This class acts as an adapter
+ * between the web server authentication layer, and the application login behavior
+ * <p>
  * Created by kfgodel on 27/03/15.
  */
 public class AuthenticatorFunctionLoginService implements LoginService {
 
-    private IdentityService identityService;
+  private IdentityService identityService;
 
-    private Function<WebCredential, Optional<Object>> appAuthenticator;
+  private Function<WebCredential, Optional<Object>> appAuthenticator;
 
-    @Override
-    public String getName() {
-        return "loginService";
+  @Override
+  public String getName() {
+    return "loginService";
+  }
+
+  @Override
+  public UserIdentity login(String username, Object credentials) {
+    if (!String.class.isInstance(credentials)) {
+      throw new WebServerException("This service is not prepared to receive non String credentials: " + credentials);
     }
-
-    @Override
-    public UserIdentity login(String username, Object credentials) {
-        if(!String.class.isInstance(credentials)){
-            throw new WebServerException("This service is not prepared to receive non String credentials: " + credentials);
-        }
-        ImmutableCredential webCredential = ImmutableCredential.create(username, (String) credentials);
-        Optional<Object> foundUserId = appAuthenticator.apply(webCredential);
-        return foundUserId
-          .map(JettyIdentityAdapter::create)
-          .orElse(null);
+    if (username == null || credentials == null) {
+      // Nobody with those credencials
+      return null;
     }
+    ImmutableCredential webCredential = ImmutableCredential.create(username, (String) credentials);
+    Optional<Object> foundUserId = appAuthenticator.apply(webCredential);
+    return foundUserId
+      .map(JettyIdentityAdapter::create)
+      .orElse(null);
+  }
 
-    @Override
-    public boolean validate(UserIdentity user) {
-        //Check if the user is still a user
-        return true;
-    }
+  @Override
+  public boolean validate(UserIdentity user) {
+    //Check if the user is still a user
+    return true;
+  }
 
-    @Override
-    public IdentityService getIdentityService() {
-        return identityService;
-    }
+  @Override
+  public IdentityService getIdentityService() {
+    return identityService;
+  }
 
-    @Override
-    public void setIdentityService(IdentityService service) {
-        this.identityService = service;
-    }
+  @Override
+  public void setIdentityService(IdentityService service) {
+    this.identityService = service;
+  }
 
-    @Override
-    public void logout(UserIdentity user) {
-        throw new WebServerException("Not implemented");
-    }
+  @Override
+  public void logout(UserIdentity user) {
+    throw new WebServerException("Not implemented");
+  }
 
-    public static AuthenticatorFunctionLoginService create(Function<WebCredential, Optional<Object>> appAuthenticator) {
-        AuthenticatorFunctionLoginService service = new AuthenticatorFunctionLoginService();
-        service.identityService = ThreadLocalIdentityService.create();
-        service.appAuthenticator = appAuthenticator;
-        return service;
-    }
+  public static AuthenticatorFunctionLoginService create(Function<WebCredential, Optional<Object>> appAuthenticator) {
+    AuthenticatorFunctionLoginService service = new AuthenticatorFunctionLoginService();
+    service.identityService = ThreadLocalIdentityService.create();
+    service.appAuthenticator = appAuthenticator;
+    return service;
+  }
 
 }
