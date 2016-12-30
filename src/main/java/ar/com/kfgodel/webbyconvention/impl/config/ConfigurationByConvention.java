@@ -9,10 +9,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.reflections.Reflections;
 
 import javax.ws.rs.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -251,6 +248,13 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     return apiResourceClasses;
   }
 
+  @Override
+  public WebServerConfiguration withSecuredRootPaths(String... securedPaths) {
+    this.securedRoots = Arrays.stream(securedPaths)
+      .collect(toSet());
+    return this;
+  }
+
   /**
    * Explores the api packages for classes usable as resources
    *
@@ -280,5 +284,6 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     this.apiResourceClasses = resourceClasses.toSet();
     return this;
   }
+
 }
 

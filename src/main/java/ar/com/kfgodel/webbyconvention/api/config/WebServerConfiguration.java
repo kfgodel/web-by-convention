@@ -169,4 +169,11 @@ public interface WebServerConfiguration {
    * recursively
    */
   Set<Class<?>> getApiResourceClasses();
+
+  /**
+   * Redefines the set of secured url paths that are going to be authenticated (to be accessed)
+   * @param securedPaths The set of paths
+   * @return This configuration
+   */
+  WebServerConfiguration withSecuredRootPaths(String... securedPaths);
 }
