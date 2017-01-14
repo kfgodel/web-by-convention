@@ -39,7 +39,7 @@ public class ServeIndexHandler extends ResourceHandler {
         return null;
       }
       Resource indexResource = getWelcome(rootUrl);
-      LOG.debug("Usando index como respuesta a [{} {}] ", request.getMethod(), request.getRequestURI());
+      LOG.debug("Usando index como respuesta a [{} {}]: {}", request.getMethod(), request.getRequestURI(), indexResource);
       return indexResource;
     }catch (IOException e){
       throw new RuntimeIOException("Error accessing index page?",e);
