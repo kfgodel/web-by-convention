@@ -1,9 +1,7 @@
 package ar.com.kfgodel.webbyconvention.impl.handlers;
 
-import org.eclipse.jetty.io.RuntimeIOException;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,20 +28,14 @@ public class ServeIndexHandler extends ResourceHandler {
 
   @Override
   protected Resource getResource(HttpServletRequest request) throws MalformedURLException {
-    try{
-      String pathInContext= URIUtil.addPaths("","/");
-      Resource rootUrl = getResource(pathInContext);
-      if(rootUrl == null){
-        // Null represents absence for jetty (avoids NPE for favicon)
-        LOG.debug("No tenemos recurso para responder el request [{} {}] ", request.getMethod(), request.getRequestURI());
-        return null;
-      }
-      Resource indexResource = getWelcome(rootUrl);
-      LOG.debug("Usando index como respuesta a [{} {}]: {}", request.getMethod(), request.getRequestURI(), indexResource);
-      return indexResource;
-    }catch (IOException e){
-      throw new RuntimeIOException("Error accessing index page?",e);
+    Resource indexResource = Resource.newClassPathResource("/convention/web/index.html");
+    if (!indexResource.exists()) {
+      LOG.debug("No encontramos index para responder el request [{} {}] ", request.getMethod(), request.getRequestURI());
+      // Null represents absence for jetty (avoids NPE for favicon)
+      return null;
     }
+    LOG.debug("Usando index como respuesta a [{} {}]: {}", request.getMethod(), request.getRequestURI(), indexResource);
+    return indexResource;
   }
 
   public static ServeIndexHandler create(String webFolderInClasspath) {
