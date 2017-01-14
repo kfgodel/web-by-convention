@@ -31,13 +31,13 @@ public class ServeIndexHandler extends ResourceHandler {
   protected Resource getResource(HttpServletRequest request) throws MalformedURLException {
     URL indexFileUrl = getClass().getResource("/convention/web/index.html");
     if (indexFileUrl == null) {
-      LOG.error("No podemos acceder al index en el classpath. [{} {}]", request.getMethod(), request.getRequestURI());
-      // Null represents absence for jetty (avoids NPE for favicon)
-      return null;
+      // En heroku no encuentra el archivo en el classpath. Intento decirselo explicitamente
+      indexFileUrl = new URL("file:/app/src/main/resources/convention/web/index.html");
     }
     Resource indexResource = Resource.newResource(indexFileUrl);
     if (indexResource == null || !indexResource.exists()) {
       LOG.debug("No encontramos index para responder el request [{} {}]: {} ", request.getMethod(), request.getRequestURI(), indexResource);
+      // Null represents absence for jetty (avoids NPE for favicon)
       return null;
     }
     LOG.debug("Usando index como respuesta a [{} {}]: {}", request.getMethod(), request.getRequestURI(), indexResource);
