@@ -28,9 +28,9 @@ public class ServeIndexHandler extends ResourceHandler {
 
   @Override
   protected Resource getResource(HttpServletRequest request) throws MalformedURLException {
-    Resource indexResource = Resource.newClassPathResource("/convention/web/index.html");
-    if (!indexResource.exists()) {
-      LOG.debug("No encontramos index para responder el request [{} {}] ", request.getMethod(), request.getRequestURI());
+    Resource indexResource = Resource.newClassPathResource("/convention/web/index.html", false, true);
+    if (indexResource == null || !indexResource.exists()) {
+      LOG.debug("No encontramos index para responder el request [{} {}]: {} ", request.getMethod(), request.getRequestURI(), indexResource);
       // Null represents absence for jetty (avoids NPE for favicon)
       return null;
     }
