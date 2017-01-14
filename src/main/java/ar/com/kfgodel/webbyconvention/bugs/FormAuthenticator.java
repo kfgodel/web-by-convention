@@ -1,5 +1,6 @@
 package ar.com.kfgodel.webbyconvention.bugs;
 
+import ar.com.kfgodel.webbyconvention.impl.auth.adapters.AuthenticatorFunctionLoginService;
 import ar.com.kfgodel.webbyconvention.impl.auth.adapters.JettyIdentityAdapter;
 import org.eclipse.jetty.http.*;
 import org.eclipse.jetty.security.ServerAuthException;
@@ -157,7 +158,7 @@ public class FormAuthenticator extends LoginAuthenticator
     public UserIdentity login(String username, Object password, ServletRequest request)
     {
 
-        UserIdentity user = super.login(username,password,request);
+        UserIdentity user = superlogin(username, password, request);
         if (user!=null)
         {
             HttpSession session = ((HttpServletRequest)request).getSession(true);
@@ -165,6 +166,24 @@ public class FormAuthenticator extends LoginAuthenticator
             session.setAttribute(SessionAuthentication.__J_AUTHENTICATED, cached);
         }
         return user;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public UserIdentity superlogin(String username, Object password, ServletRequest request) {
+        UserIdentity user;
+        if (_loginService instanceof AuthenticatorFunctionLoginService) {
+            // Esta esl a version que permite acceder al request
+            user = ((AuthenticatorFunctionLoginService) _loginService).login(username, password, (Request) request);
+        } else {
+            // Este es el codigo normal
+            user = _loginService.login(username, password);
+        }
+        if (user != null) {
+            renewSession((HttpServletRequest) request, (request instanceof Request ? ((Request) request).getResponse() : null));
+            return user;
+        }
+        return null;
     }
 
 

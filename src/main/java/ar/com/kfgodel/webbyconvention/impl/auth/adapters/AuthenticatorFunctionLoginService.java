@@ -2,10 +2,11 @@ package ar.com.kfgodel.webbyconvention.impl.auth.adapters;
 
 import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
 import ar.com.kfgodel.webbyconvention.api.exceptions.WebServerException;
-import ar.com.kfgodel.webbyconvention.impl.auth.ImmutableCredential;
+import ar.com.kfgodel.webbyconvention.impl.auth.credent.ImmutableCredential;
 import ar.com.kfgodel.webbyconvention.impl.auth.identity.ThreadLocalIdentityService;
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.UserIdentity;
 
 import java.util.Optional;
@@ -31,14 +32,11 @@ public class AuthenticatorFunctionLoginService implements LoginService {
 
   @Override
   public UserIdentity login(String username, Object credentials) {
-    if (!String.class.isInstance(credentials)) {
-      throw new WebServerException("This service is not prepared to receive non String credentials: " + credentials);
-    }
-    if (username == null || credentials == null) {
-      // Nobody with those credencials
-      return null;
-    }
-    ImmutableCredential webCredential = ImmutableCredential.create(username, (String) credentials);
+    return login(username, credentials, null);
+  }
+
+  public UserIdentity login(String username, Object credentials, Request request) {
+    ImmutableCredential webCredential = ImmutableCredential.create(username, (String) credentials, request);
     Optional<Object> foundUserId = appAuthenticator.apply(webCredential);
     return foundUserId
       .map(JettyIdentityAdapter::create)

@@ -17,4 +17,12 @@ public interface WebCredential {
      * @return The accompanying password
      */
     String getPassword();
+
+  /**
+   * Returns the parameter available in the request where this credential comes from
+   *
+   * @param parameterName name of the request parameter
+   * @return The parameter value (may be null if not defined)
+   */
+  String getRequestParameter(String parameterName);
 }
