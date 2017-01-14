@@ -19,7 +19,7 @@ public class RequestLoggerHandler extends AbstractHandler {
 
   @Override
   public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-    LOG.debug("{} {}", baseRequest.getMethod(), baseRequest.getUri());
+    LOG.debug("Recibimos {} {}", baseRequest.getMethod(), baseRequest.getUri());
   }
 
   public static RequestLoggerHandler create() {

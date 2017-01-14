@@ -2,6 +2,7 @@ package ar.com.kfgodel.webbyconvention.impl.handlers;
 
 import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.impl.handlers.logging.RequestLoggerHandler;
+import ar.com.kfgodel.webbyconvention.impl.handlers.logging.UnhandledRequestHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.HandlerList;
 
@@ -29,7 +30,8 @@ public class HandlerOrchestrator {
 
   private HandlerList wrapAdditionalHandlers(Handler securized) {
     RequestLoggerHandler loggerHandler = RequestLoggerHandler.create();
-    return Handlers.asList(loggerHandler, securized);
+    UnhandledRequestHandler unhandledRequestHandler = UnhandledRequestHandler.create();
+    return Handlers.asList(loggerHandler, securized, unhandledRequestHandler);
   }
 
   private Handler securitize(Handler contentHandler) {
