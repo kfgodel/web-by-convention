@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * This type represents the handler that serves the index page for any url, as
@@ -28,10 +29,15 @@ public class ServeIndexHandler extends ResourceHandler {
 
   @Override
   protected Resource getResource(HttpServletRequest request) throws MalformedURLException {
-    Resource indexResource = Resource.newClassPathResource("/convention/web/index.html", false, true);
+    URL indexFileUrl = getClass().getResource("/convention/web/index.html");
+    if (indexFileUrl == null) {
+      LOG.error("No podemos acceder al index en el classpath. [{} {}]", request.getMethod(), request.getRequestURI());
+      // Null represents absence for jetty (avoids NPE for favicon)
+      return null;
+    }
+    Resource indexResource = Resource.newResource(indexFileUrl);
     if (indexResource == null || !indexResource.exists()) {
       LOG.debug("No encontramos index para responder el request [{} {}]: {} ", request.getMethod(), request.getRequestURI(), indexResource);
-      // Null represents absence for jetty (avoids NPE for favicon)
       return null;
     }
     LOG.debug("Usando index como respuesta a [{} {}]: {}", request.getMethod(), request.getRequestURI(), indexResource);
