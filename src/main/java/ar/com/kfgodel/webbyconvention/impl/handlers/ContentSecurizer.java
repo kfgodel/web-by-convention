@@ -62,8 +62,7 @@ public class ContentSecurizer {
   private ConstraintSecurityHandler createConstraintedHandlerFor(Handler contentHandler) {
     // A security handler is a jetty handler that secures content behind a particular portion of a url space. The
     // ConstraintSecurityHandler is a more specialized handler that allows matching of urls to different
-    // constraints. The session handler is needed by form authentication to create a session for a given
-    // user
+    // constraints
     ConstraintSecurityHandler security = new ConstraintSecurityHandler();
 
     // We add the mapping to restrict the secured urls. Next a form authenticator will look for certain

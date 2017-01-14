@@ -23,10 +23,28 @@ public interface WebServerConfiguration {
   int getHttpPort();
 
   /**
+   * Changes the default by convention port in which teh server, serves http content
+   *
+   * @param newHttpPort The new port to be used
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention listeningHttpOn(int newHttpPort);
+
+  /**
    * @return A code lambda that will set up the injection bindings for dependency injection
    * in the resources
    */
   Consumer<AbstractBinder> getInjectionConfigurator();
+
+
+  /**
+   * Changes the default by convention bindings used to inject dependencies in the resources.<br>
+   * The given binder is the injection mechanism used by the server to manage dependencies
+   *
+   * @param binderConfig The code that defines how to define bindings
+   * @return This instance to chain methods
+   */
+  ConfigurationByConvention withInjections(Consumer<AbstractBinder> binderConfig);
 
   /**
    * The function used to authenticate user credentials given to the web server.<br>
@@ -41,39 +59,14 @@ public interface WebServerConfiguration {
    */
   Function<WebCredential, Optional<Object>> getAuthenticatorFunction();
 
-  /**
-   * @return The amount of seconds a session can remain inactive before invalidating it.<br>
-   * After that user will have to re-login
-   */
-  int getSessionTimeout();
 
   /**
-   * @return The list of folders with resources that may change during development.
-   * The server will serve the files directly allowing updates to be refreshed
+   * Changes the default authentication function that validates credential to a user identificator object
+   *
+   * @param authenticationFunction The function to use when authenticating users
+   * @return This instance to chain methods
    */
-  Nary<String> getRefreshableWebFolders();
-
-  /**
-   * @return The classpath folders that hold web content to be served
-   */
-  String getWebFolderInClasspath();
-
-  /**
-   * @return The package in the classpath that holds jersey annotated resources to expose as api
-   */
-  Nary<String> getApiResourcesPackage();
-
-  /**
-   * @return The url root paths where api requests are served
-   */
-  Nary<String> getApiRootPaths();
-
-
-  /**
-   * @return The url roots that will be restricted to authenticated users
-   * Every url that start with any of this roots will need an authenticated user
-   */
-  Nary<String> geSecuredRootPaths();
+  WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction);
 
   /**
    * Indicates that the server should not try to authenticate users (everything is anonymously accessible).
@@ -86,12 +79,25 @@ public interface WebServerConfiguration {
   WebServerConfiguration withoutAuthentication();
 
   /**
-   * Changes the default by convention port in which teh server, serves http content
+   * @return The amount of seconds a session can remain inactive before invalidating it.<br>
+   * After that user will have to re-login
+   */
+  int getSessionTimeout();
+
+  /**
+   * Changes the default by convention session expiration time
    *
-   * @param newHttpPort The new port to be used
+   * @param seconds The new time to wait for sessions
    * @return This instance to chain methods
    */
-  ConfigurationByConvention listeningHttpOn(int newHttpPort);
+  ConfigurationByConvention expiringSessionsAfter(int seconds);
+
+
+  /**
+   * @return The list of folders with resources that may change during development.
+   * The server will serve the files directly allowing updates to be refreshed
+   */
+  Nary<String> getRefreshableWebFolders();
 
   /**
    * Changes the default by convention paths where static content is located while developing.<br>
@@ -100,7 +106,12 @@ public interface WebServerConfiguration {
    * @param newContent The classpath relative location where static content is located on development
    * @return This instance to chain methods
    */
-  ConfigurationByConvention withRefreshableContentIn(Nary<String> newContent);
+  ConfigurationByConvention withRefreshableWebFoldersIn(Nary<String> newContent);
+
+  /**
+   * @return The classpath folders that hold web content to be served
+   */
+  String getWebFolderInClasspath();
 
   /**
    * Changes the default by convention classpath folder where content is served from.<br>
@@ -112,30 +123,23 @@ public interface WebServerConfiguration {
   ConfigurationByConvention usingClasspathWebFolder(String newFolder);
 
   /**
+   * @return The package in the classpath that holds jersey annotated resources to expose as api
+   */
+  Nary<String> getApiResourcePackages();
+
+  /**
    * Changes the default by convention packages where rest resources are defined.<br>
    * This packages will be explored to find classes annotated with @Path to declare http resources
    *
    * @param annotatedResourcesPackage The new package names
    * @return This instance to chain methods
    */
-  ConfigurationByConvention withResourcesFrom(Nary<String> annotatedResourcesPackage);
+  ConfigurationByConvention withApiResourcesFrom(Nary<String> annotatedResourcesPackage);
 
   /**
-   * Changes the default by convention bindings used to inject dependencies in the resources.<br>
-   * The given binder is the injection mechanism used by the server to manage dependencies
-   *
-   * @param binderConfig The code that defines how to define bindings
-   * @return This instance to chain methods
+   * @return The url root paths where api requests are served
    */
-  ConfigurationByConvention withInjections(Consumer<AbstractBinder> binderConfig);
-
-  /**
-   * Changes the default by convention session expiration time
-   *
-   * @param seconds The new time to wait for sessions
-   * @return This instance to chain methods
-   */
-  ConfigurationByConvention expiringSessionsAfter(int seconds);
+  Nary<String> getApiRootPaths();
 
   /**
    * Changes the default url location for api resources as published to the client.<br>
@@ -144,15 +148,28 @@ public interface WebServerConfiguration {
    * @param parentPath The url paths where resources are located
    * @return This instance to chain methods
    */
-  ConfigurationByConvention withApiUnder(Nary<String> parentPath);
+  ConfigurationByConvention withApiRootPathsUnder(Nary<String> parentPath);
 
   /**
-   * Changes the default authentication function that validates credential to a user identificator object
-   *
-   * @param authenticationFunction The function to use when authenticating users
-   * @return This instance to chain methods
+   * @return The url roots that will be restricted to authenticated users
+   * Every url that start with any of this roots will need an authenticated user
    */
-  WebServerConfiguration authenticatingWith(Function<WebCredential, Optional<Object>> authenticationFunction);
+  Nary<String> geSecuredRootPaths();
+
+
+  /**
+   * Redefines the set of secured url paths that are going to be authenticated (to be accessed)
+   * @param securedPaths The set of paths
+   * @return This configuration
+   */
+  WebServerConfiguration withSecuredRootPaths(String... securedPaths);
+
+  /**
+   * @return The set of classes that will be used as http resources. If default is not changed,
+   * api resource packages will be explored to look for classes annotated with {@link javax.ws.rs.Path}
+   * recursively
+   */
+  Set<Class<?>> getApiResourceClasses();
 
   /**
    * Changes the default by convention resource classes that are discovered on runtime from
@@ -163,17 +180,4 @@ public interface WebServerConfiguration {
    */
   WebServerConfiguration overridingResourceClassesWith(Nary<Class<?>> resourceClasses);
 
-  /**
-   * @return The set of classes that will be used as http resources. If default is not changed,
-   * api resource packages will be explored to look for classes annotated with {@link javax.ws.rs.Path}
-   * recursively
-   */
-  Set<Class<?>> getApiResourceClasses();
-
-  /**
-   * Redefines the set of secured url paths that are going to be authenticated (to be accessed)
-   * @param securedPaths The set of paths
-   * @return This configuration
-   */
-  WebServerConfiguration withSecuredRootPaths(String... securedPaths);
 }

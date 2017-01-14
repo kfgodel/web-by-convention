@@ -60,7 +60,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   }
 
   @Override
-  public Nary<String> getApiResourcesPackage() {
+  public Nary<String> getApiResourcePackages() {
     return Nary.create(apiResourcesPackage);
   }
 
@@ -159,7 +159,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @return This instance for call chaining
    */
   @Override
-  public ConfigurationByConvention withRefreshableContentIn(Nary<String> newContent) {
+  public ConfigurationByConvention withRefreshableWebFoldersIn(Nary<String> newContent) {
     this.refreshableWebFolders = newContent.toList();
     return this;
   }
@@ -183,7 +183,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @return This instance to chain calls
    */
   @Override
-  public ConfigurationByConvention withResourcesFrom(Nary<String> annotatedResourcesPackage) {
+  public ConfigurationByConvention withApiResourcesFrom(Nary<String> annotatedResourcesPackage) {
     this.apiResourcesPackage = annotatedResourcesPackage.toList();
     return this;
   }
@@ -220,7 +220,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @return This instance for chaining methods
    */
   @Override
-  public ConfigurationByConvention withApiUnder(Nary<String> parentPath) {
+  public ConfigurationByConvention withApiRootPathsUnder(Nary<String> parentPath) {
     this.apiRootPaths = parentPath.toSet();
     return this;
   }
@@ -261,7 +261,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
    * @return The set of resource classes
    */
   private Set<Class<?>> discoverResourceClasses() {
-    Nary<String> resourcePackages = this.getApiResourcesPackage();
+    Nary<String> resourcePackages = this.getApiResourcePackages();
     return resourcePackages
       .flatMap(this::getAnnotatedResourcesIn)
       .collect(toSet());
