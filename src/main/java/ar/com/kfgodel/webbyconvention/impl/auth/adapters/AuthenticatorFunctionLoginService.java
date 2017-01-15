@@ -1,6 +1,7 @@
 package ar.com.kfgodel.webbyconvention.impl.auth.adapters;
 
 import ar.com.kfgodel.webbyconvention.api.auth.WebCredential;
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.api.exceptions.WebServerException;
 import ar.com.kfgodel.webbyconvention.impl.auth.credent.ImmutableCredential;
 import ar.com.kfgodel.webbyconvention.impl.auth.identity.ThreadLocalIdentityService;
@@ -23,8 +24,7 @@ public class AuthenticatorFunctionLoginService implements LoginService {
 
   private IdentityService identityService;
 
-  private Function<WebCredential, Optional<Object>> appAuthenticator;
-  private Optional<String> redirectPath;
+  private WebServerConfiguration config;
 
   @Override
   public String getName() {
@@ -38,10 +38,14 @@ public class AuthenticatorFunctionLoginService implements LoginService {
 
   public UserIdentity login(String username, Object credentials, Request request) {
     ImmutableCredential webCredential = ImmutableCredential.create(username, (String) credentials, request);
-    Optional<Object> foundUserId = appAuthenticator.apply(webCredential);
+    Optional<Object> foundUserId = getAuthenticatorFunction().apply(webCredential);
     return foundUserId
-      .map((applicationIdentification) -> JettyIdentityAdapter.create(applicationIdentification, redirectPath))
+      .map(JettyIdentityAdapter::create)
       .orElse(null);
+  }
+
+  private Function<WebCredential, Optional<Object>> getAuthenticatorFunction() {
+    return config.getAuthenticatorFunction();
   }
 
   @Override
@@ -65,11 +69,10 @@ public class AuthenticatorFunctionLoginService implements LoginService {
     throw new WebServerException("Not implemented");
   }
 
-  public static AuthenticatorFunctionLoginService create(Function<WebCredential, Optional<Object>> appAuthenticator, Optional<String> redirectPath) {
+  public static AuthenticatorFunctionLoginService create(WebServerConfiguration config) {
     AuthenticatorFunctionLoginService service = new AuthenticatorFunctionLoginService();
     service.identityService = ThreadLocalIdentityService.create();
-    service.appAuthenticator = appAuthenticator;
-    service.redirectPath = redirectPath;
+    service.config = config;
     return service;
   }
 

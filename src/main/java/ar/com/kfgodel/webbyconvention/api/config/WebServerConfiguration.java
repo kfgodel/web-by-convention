@@ -186,7 +186,7 @@ public interface WebServerConfiguration {
    *
    * @return An optional path. If empty the server won't redirect (instead return a number)
    */
-  Optional<String> getRedirectPath();
+  Optional<String> getSuccessfulAuthenticationRedirectPath();
 
   /**
    * Changes the default behavior after authentication to make client broweser redirect to
@@ -196,6 +196,24 @@ public interface WebServerConfiguration {
    * @param redirectPath Path to send the user to
    * @return This instance
    */
-  WebServerConfiguration redirectingAfterAuthenticationTo(String redirectPath);
+  WebServerConfiguration redirectingAfterSuccessfulAuthenticationTo(String redirectPath);
+
+  /**
+   * A path to redirect the client browser after a failed authentication.
+   * This is useful when authentication is handled outside the app
+   *
+   * @return An optional path to redirect. If empty, the server won't redirect
+   */
+  Optional<String> getFailedAuthenticationRedirectPath();
+
+  /**
+   * Changes the default behavior after a failed authentication to make client broweser redirect to
+   * indicated path when authentication failed.
+   * This makes the server redirect a failed authentication request
+   *
+   * @param redirectPath Path to send the user to
+   * @return This instance
+   */
+  WebServerConfiguration redirectingAfterFailedAuthenticationTo(String redirectPath);
 
 }

@@ -1,5 +1,6 @@
 package ar.com.kfgodel.webbyconvention.bugs;
 
+import ar.com.kfgodel.webbyconvention.api.config.WebServerConfiguration;
 import ar.com.kfgodel.webbyconvention.impl.auth.adapters.AuthenticatorFunctionLoginService;
 import ar.com.kfgodel.webbyconvention.impl.auth.adapters.JettyIdentityAdapter;
 import org.eclipse.jetty.http.*;
@@ -56,14 +57,17 @@ public class FormAuthenticator extends LoginAuthenticator
     private boolean _dispatch;
     private boolean _alwaysSaveUri;
 
+    private WebServerConfiguration _config;
+
     public FormAuthenticator()
     {
     }
 
     /* ------------------------------------------------------------ */
-    public FormAuthenticator(String login,String error,boolean dispatch)
+    public FormAuthenticator(String login, String error, boolean dispatch, WebServerConfiguration config)
     {
         this();
+        this._config = config;
         if (login!=null)
             setLoginPage(login);
         if (error!=null)
@@ -293,18 +297,13 @@ public class FormAuthenticator extends LoginAuthenticator
                     }
                     LOG.debug("authenticated {}->{}",form_auth,nuri);
 
-                    // This is the only type we use
-                    JettyIdentityAdapter identification = (JettyIdentityAdapter) form_auth.getUserIdentity();
-
-                    Optional<String> redirectPath = identification.getRedirectPath();
-                    if (redirectPath.isPresent()) {
-                        response.setContentLength(0);
-                        Response base_response = HttpChannel.getCurrentHttpChannel().getResponse();
-                        Request base_request = HttpChannel.getCurrentHttpChannel().getRequest();
-                        int redirectCode = (base_request.getHttpVersion().getVersion() < HttpVersion.HTTP_1_1.getVersion() ? HttpServletResponse.SC_MOVED_TEMPORARILY : HttpServletResponse.SC_SEE_OTHER);
-                        base_response.sendRedirect(redirectCode, response.encodeRedirectURL(redirectPath.get()));
+                    Optional<String> successPath = _config.getSuccessfulAuthenticationRedirectPath();
+                    if (successPath.isPresent()) {
+                        doRedirectTo(successPath.get(), response);
                         return form_auth;
                     } else {
+                        // This is the only type we use
+                        JettyIdentityAdapter identification = (JettyIdentityAdapter) form_auth.getUserIdentity();
                         Object applicationIdentification = (Object) identification.getApplicationIdentification();
 
                         // Do a 200 OK instead of 303 redirect to main page
@@ -317,6 +316,13 @@ public class FormAuthenticator extends LoginAuthenticator
                 // not authenticated
                 if (LOG.isDebugEnabled())
                     LOG.debug("Form authentication FAILED for " + StringUtil.printable(username));
+
+                Optional<String> failedPath = _config.getFailedAuthenticationRedirectPath();
+                if (failedPath.isPresent()) {
+                    doRedirectTo(failedPath.get(), response);
+                    return Authentication.SEND_FAILURE;
+                }
+
                 if (_formErrorPage == null)
                 {
                     LOG.debug("auth failed {}->401",username);
@@ -440,6 +446,14 @@ public class FormAuthenticator extends LoginAuthenticator
         {
             throw new ServerAuthException(e);
         }
+    }
+
+    private void doRedirectTo(String redirectPath, HttpServletResponse response) throws IOException {
+        response.setContentLength(0);
+        Response base_response = HttpChannel.getCurrentHttpChannel().getResponse();
+        Request base_request = HttpChannel.getCurrentHttpChannel().getRequest();
+        int redirectCode = (base_request.getHttpVersion().getVersion() < HttpVersion.HTTP_1_1.getVersion() ? HttpServletResponse.SC_MOVED_TEMPORARILY : HttpServletResponse.SC_SEE_OTHER);
+        base_response.sendRedirect(redirectCode, response.encodeRedirectURL(redirectPath));
     }
 
     /* ------------------------------------------------------------ */

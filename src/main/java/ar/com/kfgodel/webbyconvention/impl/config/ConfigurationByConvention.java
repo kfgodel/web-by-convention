@@ -34,7 +34,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   private Set<String> apiRootPaths;
   private Set<String> securedRoots;
   private Set<Class<?>> apiResourceClasses;
-  private Optional<String> redirectPath;
+  private Optional<String> successRedirectPath;
+  private Optional<String> failedRedirectPath;
 
 
   private Optional<Object> authenticateAll(WebCredential webCredential) {
@@ -139,6 +140,8 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     this.injectionConfiguration = this::noBinding;
     this.authenticatorFunction = this::authenticateAll;
     this.sessionTimeout = (int) TimeUnit.MINUTES.toSeconds(30);
+    this.successRedirectPath = Optional.empty();
+    this.failedRedirectPath = Optional.empty();
   }
 
   /**
@@ -287,13 +290,24 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   }
 
   @Override
-  public Optional<String> getRedirectPath() {
-    return redirectPath;
+  public Optional<String> getSuccessfulAuthenticationRedirectPath() {
+    return successRedirectPath;
   }
 
   @Override
-  public WebServerConfiguration redirectingAfterAuthenticationTo(String redirectPath) {
-    this.redirectPath = Optional.of(redirectPath);
+  public WebServerConfiguration redirectingAfterSuccessfulAuthenticationTo(String redirectPath) {
+    this.successRedirectPath = Optional.of(redirectPath);
+    return this;
+  }
+
+  @Override
+  public Optional<String> getFailedAuthenticationRedirectPath() {
+    return failedRedirectPath;
+  }
+
+  @Override
+  public WebServerConfiguration redirectingAfterFailedAuthenticationTo(String redirectPath) {
+    this.failedRedirectPath = Optional.of(redirectPath);
     return this;
   }
 }

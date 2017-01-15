@@ -68,11 +68,11 @@ public class ContentSecurizer {
     // We add the mapping to restrict the secured urls. Next a form authenticator will look for certain
     // requests and parameters to authenticate a user and manage its session
     security.setConstraintMappings(getConfigConstraintedMappings());
-    security.setAuthenticator(new FormAuthenticator(null, null, false));
+    security.setAuthenticator(new FormAuthenticator(null, null, false, config));
 
     // Finally a login service is used by the chosen authenticator to authenticate a user against the application code
     // This login service uses the function given by the webServer config
-    LoginService loginService = AuthenticatorFunctionLoginService.create(config.getAuthenticatorFunction(), config.getRedirectPath());
+    LoginService loginService = AuthenticatorFunctionLoginService.create(config);
     security.setLoginService(loginService);
 
     // Wrap the unsecure handlers into the secure handlers
