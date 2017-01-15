@@ -72,7 +72,7 @@ public class ContentSecurizer {
 
     // Finally a login service is used by the chosen authenticator to authenticate a user against the application code
     // This login service uses the function given by the webServer config
-    LoginService loginService = AuthenticatorFunctionLoginService.create(config.getAuthenticatorFunction());
+    LoginService loginService = AuthenticatorFunctionLoginService.create(config.getAuthenticatorFunction(), config.getRedirectPath());
     security.setLoginService(loginService);
 
     // Wrap the unsecure handlers into the secure handlers

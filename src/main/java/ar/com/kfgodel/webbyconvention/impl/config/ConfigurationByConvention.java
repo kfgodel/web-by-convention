@@ -34,6 +34,7 @@ public class ConfigurationByConvention implements WebServerConfiguration {
   private Set<String> apiRootPaths;
   private Set<String> securedRoots;
   private Set<Class<?>> apiResourceClasses;
+  private Optional<String> redirectPath;
 
 
   private Optional<Object> authenticateAll(WebCredential webCredential) {
@@ -285,5 +286,15 @@ public class ConfigurationByConvention implements WebServerConfiguration {
     return this;
   }
 
+  @Override
+  public Optional<String> getRedirectPath() {
+    return redirectPath;
+  }
+
+  @Override
+  public WebServerConfiguration redirectingAfterAuthenticationTo(String redirectPath) {
+    this.redirectPath = Optional.of(redirectPath);
+    return this;
+  }
 }
 

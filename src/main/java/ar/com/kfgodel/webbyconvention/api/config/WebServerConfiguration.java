@@ -180,4 +180,22 @@ public interface WebServerConfiguration {
    */
   WebServerConfiguration overridingResourceClassesWith(Nary<Class<?>> resourceClasses);
 
+  /**
+   * A path to redirect the client browser after authentication. This is useful when the authentication
+   * is handled outside the app
+   *
+   * @return An optional path. If empty the server won't redirect (instead return a number)
+   */
+  Optional<String> getRedirectPath();
+
+  /**
+   * Changes the default behavior after authentication to make client broweser redirect to
+   * indicated path after the authentication has been handled correctly.
+   * This makes the server redirect a successful authentication request
+   *
+   * @param redirectPath Path to send the user to
+   * @return This instance
+   */
+  WebServerConfiguration redirectingAfterAuthenticationTo(String redirectPath);
+
 }

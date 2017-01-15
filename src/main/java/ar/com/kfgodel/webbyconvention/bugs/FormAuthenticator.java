@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Copied from jetty FormAuthenticator to fix a NPE bug while accessing a null contextPath.<br>
@@ -294,12 +295,23 @@ public class FormAuthenticator extends LoginAuthenticator
 
                     // This is the only type we use
                     JettyIdentityAdapter identification = (JettyIdentityAdapter) form_auth.getUserIdentity();
-                    Object applicationIdentification = (Object) identification.getApplicationIdentification();
 
-                    // Do a 200 OK instead of 303 redirect to main page
-                    response.getWriter().write(applicationIdentification.toString());
-                    response.setContentType("text/plain");
-                    return form_auth;
+                    Optional<String> redirectPath = identification.getRedirectPath();
+                    if (redirectPath.isPresent()) {
+                        response.setContentLength(0);
+                        Response base_response = HttpChannel.getCurrentHttpChannel().getResponse();
+                        Request base_request = HttpChannel.getCurrentHttpChannel().getRequest();
+                        int redirectCode = (base_request.getHttpVersion().getVersion() < HttpVersion.HTTP_1_1.getVersion() ? HttpServletResponse.SC_MOVED_TEMPORARILY : HttpServletResponse.SC_SEE_OTHER);
+                        base_response.sendRedirect(redirectCode, response.encodeRedirectURL(redirectPath.get()));
+                        return form_auth;
+                    } else {
+                        Object applicationIdentification = (Object) identification.getApplicationIdentification();
+
+                        // Do a 200 OK instead of 303 redirect to main page
+                        response.getWriter().write(applicationIdentification.toString());
+                        response.setContentType("text/plain");
+                        return form_auth;
+                    }
                 }
 
                 // not authenticated

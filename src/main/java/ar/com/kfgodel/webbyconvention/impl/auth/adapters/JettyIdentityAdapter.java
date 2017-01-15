@@ -5,6 +5,7 @@ import org.eclipse.jetty.server.UserIdentity;
 
 import javax.security.auth.Subject;
 import java.security.Principal;
+import java.util.Optional;
 
 /**
  * This type represents the user identity of a logged in user for the web server.<br>
@@ -17,6 +18,7 @@ import java.security.Principal;
 public class JettyIdentityAdapter implements UserIdentity, Principal {
 
     private Object appIdentification;
+    private Optional<String> redirectPath;
 
     @Override
     public Subject getSubject() {
@@ -48,9 +50,14 @@ public class JettyIdentityAdapter implements UserIdentity, Principal {
         return (T) appIdentification;
     }
 
-    public static JettyIdentityAdapter create(Object applicationIdentification) {
+    public static JettyIdentityAdapter create(Object applicationIdentification, Optional<String> redirectPath) {
         JettyIdentityAdapter userIdentity = new JettyIdentityAdapter();
         userIdentity.appIdentification = applicationIdentification;
+        userIdentity.redirectPath = redirectPath;
         return userIdentity;
+    }
+
+    public Optional<String> getRedirectPath() {
+        return redirectPath;
     }
 }

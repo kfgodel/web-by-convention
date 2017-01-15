@@ -24,6 +24,7 @@ public class AuthenticatorFunctionLoginService implements LoginService {
   private IdentityService identityService;
 
   private Function<WebCredential, Optional<Object>> appAuthenticator;
+  private Optional<String> redirectPath;
 
   @Override
   public String getName() {
@@ -39,7 +40,7 @@ public class AuthenticatorFunctionLoginService implements LoginService {
     ImmutableCredential webCredential = ImmutableCredential.create(username, (String) credentials, request);
     Optional<Object> foundUserId = appAuthenticator.apply(webCredential);
     return foundUserId
-      .map(JettyIdentityAdapter::create)
+      .map((applicationIdentification) -> JettyIdentityAdapter.create(applicationIdentification, redirectPath))
       .orElse(null);
   }
 
@@ -64,10 +65,11 @@ public class AuthenticatorFunctionLoginService implements LoginService {
     throw new WebServerException("Not implemented");
   }
 
-  public static AuthenticatorFunctionLoginService create(Function<WebCredential, Optional<Object>> appAuthenticator) {
+  public static AuthenticatorFunctionLoginService create(Function<WebCredential, Optional<Object>> appAuthenticator, Optional<String> redirectPath) {
     AuthenticatorFunctionLoginService service = new AuthenticatorFunctionLoginService();
     service.identityService = ThreadLocalIdentityService.create();
     service.appAuthenticator = appAuthenticator;
+    service.redirectPath = redirectPath;
     return service;
   }
 
