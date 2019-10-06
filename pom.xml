@@ -16,11 +16,12 @@
 
   <name>WebByConvention</name>
   <description>Pre-configured Jetty server to write web apps really easily (using convention over configuration)</description>
+  <url>https://github.com/kfgodel/web-by-convention</url>
 
   <scm>
-    <connection>scm:git:ssh://github.com/kfgodel/web-by-convention.git</connection>
     <developerConnection>scm:git:ssh://github.com/kfgodel/web-by-convention.git</developerConnection>
-    <url>https://github.com/kfgodel/web-by-convention</url>
+    <connection>${project.scm.developerConnection}</connection>
+    <url>${project.url}</url>
   </scm>
 
   <repositories>
@@ -32,6 +33,9 @@
   </repositories>
 
   <properties>
+    <!-- Sonar properties to prevent unintentional id changes (Reference: https://docs.sonarqube.org/latest/analysis/analysis-parameters/) -->
+    <sonar.projectKey>ar.com.kfgodel:web-by-convention:master</sonar.projectKey>
+
     <version.jetty>9.2.10.v20150310</version.jetty>
     <version.jersey>2.17</version.jersey>
     <version.reflections>0.9.9</version.reflections>
